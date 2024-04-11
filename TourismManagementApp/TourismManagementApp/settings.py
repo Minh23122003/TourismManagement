@@ -15,6 +15,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+MEDIA_ROOT = '%s/TourismManagement/static/' % BASE_DIR
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -27,6 +28,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+import pymysql
+
+pymysql.install_as_MySQLdb()
 
 # Application definition
 
@@ -37,7 +41,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'TourismManagement',
+    'ckeditor',
+    'ckeditor_uploader',
+    'rest_framework',
+    'drf_yasg',
+    'oauth2_provider'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    )
+}
+
+CKEDITOR_UPLOAD_PATH = "ckeditors/images/"
+
+AUTH_USER_MODEL = 'TourismManagement.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -82,6 +102,14 @@ DATABASES = {
         'HOST': ''
     }
 }
+
+import cloudinary
+
+cloudinary.config(
+    cloud_name="dyehwnue5",
+    api_key="944547956246838",
+    api_secret="RoCUyh0je2qJ79EnJMhu-3cmyIY"
+)
 
 
 # Password validation
