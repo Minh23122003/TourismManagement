@@ -1,7 +1,8 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from rest_framework import viewsets, generics
+from TourismManagement import serializers
+from TourismManagement.models import *
 
-# Create your views here.
 
-def index(request):
-    return HttpResponse("Tourism Management App!")
+class TourViewSet(viewsets.ViewSet, generics.ListAPIView):
+    queryset = Tour.objects.filter(active=True)
+    serializer_class = serializers.TourSerializer
