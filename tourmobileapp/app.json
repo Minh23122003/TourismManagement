@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "tourmobileapp",
+    "slug": "tourmobileapp",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "tourmobileapp"
+}
