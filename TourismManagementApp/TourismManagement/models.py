@@ -67,7 +67,8 @@ class Tour(BaseModel):
     start_date = models.DateTimeField(null=False)
     end_date = models.DateTimeField(null=False)
     description = RichTextField()
-    price = models.IntegerField()
+    price_adult = models.IntegerField()
+    price_children = models.IntegerField()
     tour_category = models.ForeignKey(TourCategory, on_delete=models.CASCADE)
     destination = models.ManyToManyField(Destination)
 
@@ -75,9 +76,10 @@ class Tour(BaseModel):
         return self.name
 
 
-class Booking(models.Model):
+class Booking(BaseModel):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE)
+    is_adult = models.BooleanField()
 
     def __str__(self):
         return f'{self.customer_id} - {self.tour_id}'
