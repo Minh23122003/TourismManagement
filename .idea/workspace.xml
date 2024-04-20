@@ -5,8 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a1f7b89-a683-4f04-a841-3638348df43b" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/TourismManagement.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TourismManagement.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagementApp/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagementApp/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagementApp/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagementApp/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TourismManagementApp/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,19 +35,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "D:/lập trình hiện đại/TourismManagement/TourismManagementApp",
-    "node.js.selected.package.tslint": "(autodetect)"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/lập trình hiện đại/TourismManagement/TourismManagementApp&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-50da183f06c8-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.13135.95" />
+        <option value="bundled-js-predefined-1d06a55b98c1-74d2a5396914-JavaScript-PY-241.14494.241" />
+        <option value="bundled-python-sdk-0509580d9d50-28c9f5db9ffe-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.14494.241" />
       </set>
     </attachedChunks>
   </component>
@@ -51,7 +65,14 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1712239376153</updated>
+      <workItem from="1713458922794" duration="3239000" />
+      <workItem from="1713627619790" duration="12775000" />
+      <workItem from="1713640651742" duration="8142000" />
+      <workItem from="1713648925235" duration="2053000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>
