@@ -8,36 +8,6 @@ class User(AbstractUser):
     avatar = CloudinaryField(null=False)
 
 
-class Admin(models.Model):
-    name = models.CharField(max_length=100)
-    address = models.CharField(max_length=100)
-    phone = models.CharField(max_length=10)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.name
-
-
-class Staff(models.Model):
-    name = models.CharField(max_length=100)
-    address = models.CharField(max_length=100)
-    phone = models.CharField(max_length=10)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.name
-
-
-class Customer(models.Model):
-    name = models.CharField(max_length=100)
-    address = models.CharField(max_length=100)
-    phone = models.CharField(max_length=10)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.name
-
-
 class BaseModel(models.Model):
     created_date = models.DateTimeField(auto_now_add=True, null=True)
     updated_date = models.DateTimeField(auto_now=True, null=True)
@@ -45,6 +15,36 @@ class BaseModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class Admin(BaseModel):
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
+    phone = models.CharField(max_length=10)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+class Staff(BaseModel):
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
+    phone = models.CharField(max_length=10)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+class Customer(BaseModel):
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
+    phone = models.CharField(max_length=10)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
 
 class TourCategory(BaseModel):
@@ -79,7 +79,8 @@ class Tour(BaseModel):
 class Booking(BaseModel):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE)
-    is_adult = models.BooleanField()
+    quantity_ticket_adult = models.IntegerField()
+    quantity_ticket_children = models.IntegerField()
 
     def __str__(self):
         return f'{self.customer_id} - {self.tour_id}'
@@ -175,3 +176,27 @@ class Report(BaseModel):
 
     def __str__(self):
         return str(self.start_date)
+
+
+
+# tc1 = TourCategory(name='Viet Nam')
+# tc1.save()
+# tc1 = TourCategory(name='Chau A')
+# tc1.save()
+# tc1 = TourCategory(name='Chau Au')
+# tc1.save()
+# tc1 = TourCategory(name='Chau My')
+# tc1.save()
+# tc1 = TourCategory(name='Chau Phi')
+# tc1.save()
+# tc1 = TourCategory(name='Chau Uc')
+# tc1.save()
+
+# u1 = User(username='admin', email='admin@gmail.com', password='pbkdf2_sha256$720000$ybIgzYuBkpJ2n1Dv8v1Fxt$o9lssmkMEZ80So+JBqi6DcEQzOMI2LJNu185NZboGiY=', is_superuser=True, is_staff=True)
+# u2 = User(username='staff', email='staff@gmail.com', password='pbkdf2_sha256$720000$ybIgzYuBkpJ2n1Dv8v1Fxt$o9lssmkMEZ80So+JBqi6DcEQzOMI2LJNu185NZboGiY=', is_staff=True)
+# u3 = User(username='customer', email='customer@gmail.com', password='pbkdf2_sha256$720000$ybIgzYuBkpJ2n1Dv8v1Fxt$o9lssmkMEZ80So+JBqi6DcEQzOMI2LJNu185NZboGiY=')
+# u1.save()
+# u2.save()
+# u3.save()
+
+# d = Destination()
