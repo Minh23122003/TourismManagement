@@ -7,31 +7,31 @@ from rest_framework.decorators import action
 from .models import *
 
 
-class StaffViewSet(viewsets.ModelViewSet):
+class StaffViewSet(viewsets.ViewSet):
     serializer_class = serializers.StaffSerializer
     queryset = Staff.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
 
-class CustomerViewSet(viewsets.ModelViewSet):
+class CustomerViewSet(viewsets.ViewSet):
     serializer_class = serializers.CustomerSerializer
     queryset = Customer.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
 
-class AdminViewSet(viewsets.ModelViewSet):
+class AdminViewSet(viewsets.ViewSet):
     queryset = Admin.objects.filter()
     serializer_class = serializers.AdminSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
-class ReportViewSet(viewsets.ModelViewSet):
+class ReportViewSet(viewsets.ViewSet):
     serializer_class = serializers.ReportSerializer
     queryset = Report.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
 
-class TourViewSet(viewsets.ModelViewSet):
+class TourViewSet(viewsets.ViewSet):
 
     queryset = Tour.objects.filter(active=True)
     serializer_class = serializers.TourSerializer
@@ -76,7 +76,7 @@ class TourViewSet(viewsets.ModelViewSet):
 
         return [permissions.IsAuthenticated()]
 
-class TourImageViewSet(viewsets.ModelViewSet):
+class TourImageViewSet(viewsets.ViewSet):
     queryset = TourImage.objects.filter(active=True)
     serializer_class = serializers.TourImageSerializer
 
@@ -87,7 +87,7 @@ class TourImageViewSet(viewsets.ModelViewSet):
         return [permissions.IsAuthenticated()]
 
 
-class TourCategoryViewSet(viewsets.ModelViewSet):
+class TourCategoryViewSet(viewsets.ViewSet):
     queryset = TourCategory.objects.filter(active=True)
     serializer_class = serializers.TourCategorySerializer
 
@@ -97,7 +97,7 @@ class TourCategoryViewSet(viewsets.ModelViewSet):
 
         return [permissions.IsAuthenticated()]
 
-class DestinationViewSet(viewsets.ModelViewSet):
+class DestinationViewSet(viewsets.ViewSet):
     queryset = Destination.objects.filter(active=True)
     serializer_class = serializers.DestinationSerializer
 
@@ -107,19 +107,19 @@ class DestinationViewSet(viewsets.ModelViewSet):
 
         return [permissions.IsAuthenticated()]
 
-class BookingViewSet(viewsets.ModelViewSet):
+class BookingViewSet(viewsets.ViewSet):
     queryset = Booking.objects.filter(active=True)
     serializer_class = serializers.BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
-class BillViewSet(viewsets.ModelViewSet):
+class BillViewSet(viewsets.ViewSet):
     queryset = Bill.objects.all()
     serializer_class = serializers.BillSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
-class NewsViewSet(viewsets.ModelViewSet):
+class NewsViewSet(viewsets.ViewSet):
     queryset = News.objects.filter(active=True)
     serializer_class = serializers.NewsSerializer
 
@@ -129,7 +129,7 @@ class NewsViewSet(viewsets.ModelViewSet):
 
         return [permissions.IsAuthenticated()]
 
-class NewsImageViewSet(viewsets.ModelViewSet):
+class NewsImageViewSet(viewsets.ViewSet):
     queryset = NewsImage.objects.filter(active=True)
     serializer_class = serializers.NewsImageSerializer
 
@@ -140,7 +140,7 @@ class NewsImageViewSet(viewsets.ModelViewSet):
         return [permissions.IsAuthenticated()]
 
 
-class NewsCategoryViewSet(viewsets.ModelViewSet):
+class NewsCategoryViewSet(viewsets.ViewSet):
     queryset = NewsCategory.objects.filter(active=True)
     serializer_class = serializers.NewsCategorySerializer
 
@@ -150,7 +150,7 @@ class NewsCategoryViewSet(viewsets.ModelViewSet):
 
         return [permissions.IsAuthenticated()]
 
-class RatingViewSet(viewsets.ModelViewSet):
+class RatingViewSet(viewsets.ViewSet):
     serializer_class = serializers.RatingSerializer
     queryset = Rating.objects.filter(active=True)
 
@@ -160,7 +160,7 @@ class RatingViewSet(viewsets.ModelViewSet):
 
         return [permissions.IsAuthenticated()]
 
-class LikeViewSet(viewsets.ModelViewSet):
+class LikeViewSet(viewsets.ViewSet):
     serializer_class = serializers.LikeSerializer
     queryset = Like.objects.filter(active=True)
     def get_permissions(self):
@@ -169,7 +169,7 @@ class LikeViewSet(viewsets.ModelViewSet):
 
         return [permissions.IsAuthenticated()]
 
-class CommentTourViewSet(viewsets.ModelViewSet):
+class CommentTourViewSet(viewsets.ViewSet):
     queryset = CommentTour.objects.filter(active=True)
     serializer_class = serializers.CommentTourSerializer
 
@@ -180,7 +180,7 @@ class CommentTourViewSet(viewsets.ModelViewSet):
         return [permissions.IsAuthenticated()]
 
 
-class CommentNewsViewSet(viewsets.ModelViewSet):
+class CommentNewsViewSet(viewsets.ViewSet):
     queryset = CommentNews.objects.filter(active=True)
     serializer_class = serializers.CommentNewsSerializer
 
