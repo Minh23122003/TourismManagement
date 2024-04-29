@@ -69,6 +69,7 @@ class Tour(BaseModel):
     description = RichTextField()
     price_adult = models.IntegerField()
     price_children = models.IntegerField()
+    quantity_ticket = models.IntegerField()
     tour_category = models.ForeignKey(TourCategory, on_delete=models.CASCADE)
     destination = models.ManyToManyField(Destination)
 
