@@ -31,7 +31,7 @@ class ReportViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class TourViewSet(viewsets.ViewSet):
+class TourViewSet(viewsets.ViewSet, generics.ListAPIView):
 
     queryset = Tour.objects.filter(active=True)
     serializer_class = serializers.TourSerializer
@@ -76,7 +76,7 @@ class TourViewSet(viewsets.ViewSet):
 
         return [permissions.IsAuthenticated()]
 
-class TourImageViewSet(viewsets.ViewSet):
+class TourImageViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = TourImage.objects.filter(active=True)
     serializer_class = serializers.TourImageSerializer
 
@@ -97,7 +97,7 @@ class TourCategoryViewSet(viewsets.ViewSet):
 
         return [permissions.IsAuthenticated()]
 
-class DestinationViewSet(viewsets.ViewSet):
+class DestinationViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Destination.objects.filter(active=True)
     serializer_class = serializers.DestinationSerializer
 

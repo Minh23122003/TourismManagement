@@ -2,6 +2,14 @@ from rest_framework import serializers
 from .models import *
 
 
+class ItemSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['image'] = instance.image.url
+
+        return rep
+
+
 class AdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = Admin
@@ -56,7 +64,7 @@ class TourCategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class TourImageSerializer(serializers.ModelSerializer):
+class TourImageSerializer(ItemSerializer):
     class Meta:
         model = TourImage
         fields = '__all__'
@@ -92,7 +100,7 @@ class NewsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class NewsImageSerializer(serializers.ModelSerializer):
+class NewsImageSerializer(ItemSerializer):
     class Meta:
         model = NewsImage
         fields = '__all__'
