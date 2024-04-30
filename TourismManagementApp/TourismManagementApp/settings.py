@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-vv4q=37mn6$60$%lo#12rq)v@c0o7_6bo2yg^0*lmn1e4-w&3f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['192.168.1.5']
 
 import pymysql
 
@@ -70,11 +70,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware'
-]
-
-
-INTERNAL_IPS = [
-    '127.0.0.1'
 ]
 
 ROOT_URLCONF = 'TourismManagementApp.urls'
