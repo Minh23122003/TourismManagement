@@ -1,3 +1,5 @@
+from unittest.mock import Base
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from ckeditor.fields import RichTextField
@@ -19,7 +21,7 @@ class BaseModel(models.Model):
 
 class Admin(BaseModel):
     name = models.CharField(max_length=100)
-    address = models.CharField(max_length=100)
+    address = models.CharField(max_length=110)
     phone = models.CharField(max_length=10)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 

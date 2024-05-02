@@ -1,7 +1,7 @@
 import cloudinary
 from django.contrib import admin
 from django.utils.html import mark_safe
-from TourismManagement.models import *
+from .models import *
 from django import forms
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 

@@ -13,20 +13,18 @@ class ItemSerializer(serializers.ModelSerializer):
 class AdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = Admin
-        fields = '__all__'
+        exclude = ['user']
 
 
 class StaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = Staff
-        fields = '__all__'
-
+        exclude = ['user']
 
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = '__all__'
-
+        exclude = ['user']
 
 class ReportSerializer(serializers.ModelSerializer):
     class Meta:

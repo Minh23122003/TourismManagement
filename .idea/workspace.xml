@@ -5,16 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a1f7b89-a683-4f04-a841-3638348df43b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/TourismManagement.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TourismManagement.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagement/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagementApp/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagementApp/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TourismManagementApp/TourismManagementApp/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/TourismManagementApp/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TourismManagementApp/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TourismManagementApp/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,10 +65,22 @@
       <workItem from="1713627619790" duration="12775000" />
       <workItem from="1713640651742" duration="8142000" />
       <workItem from="1713648925235" duration="2053000" />
+      <workItem from="1714636794345" duration="13658000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
