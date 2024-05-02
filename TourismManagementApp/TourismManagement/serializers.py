@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import *
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 
 class ItemSerializer(serializers.ModelSerializer):
@@ -55,19 +57,26 @@ class CommentTourSerializer(serializers.ModelSerializer):
 class TourSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tour
-        fields = '__all__'
-
-
-class TourCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TourCategory
-        fields = '__all__'
+        fields = ['id', 'name', 'start_date', 'end_date', 'description', 'price_adult', 'price_children']
 
 
 class TourImageSerializer(ItemSerializer):
     class Meta:
         model = TourImage
-        fields = '__all__'
+        fields = ['id', 'name', 'image']
+
+class TourDetailsSerializer(TourSerializer):
+    tour_image = TourImageSerializer(many=True)
+
+    class Meta:
+        model = TourSerializer.Meta.model
+        fields = TourSerializer.Meta.fields + ['tour_image']
+
+
+class TourCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TourCategory
+        fields = ['id', 'name']
 
 
 class BookingSerializer(serializers.ModelSerializer):

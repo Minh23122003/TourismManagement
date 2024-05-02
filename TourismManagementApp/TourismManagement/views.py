@@ -33,7 +33,7 @@ class ReportViewSet(viewsets.ViewSet):
 class TourViewSet(viewsets.ViewSet, generics.ListAPIView):
 
     queryset = Tour.objects.filter(active=True)
-    serializer_class = serializers.TourSerializer
+    serializer_class = serializers.TourDetailsSerializer
     pagination_class = paginators.TourPaginator
 
     @action(methods=['get'], detail=True,
@@ -87,15 +87,22 @@ class TourImageViewSet(viewsets.ViewSet, generics.ListAPIView):
         return [permissions.IsAuthenticated()]
 
 
-class TourCategoryViewSet(viewsets.ViewSet):
+class TourCategoryViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = TourCategory.objects.filter(active=True)
     serializer_class = serializers.TourCategorySerializer
 
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
+    def get_queryset(self):
+        queries = self.queryset
+        q = self.request.query_params.get('q')
+        if q:
+            queries = queries.filter(name__icontains=q)
 
-        return [permissions.IsAuthenticated()]
+        return queries
+
+    @action(methods=['get'], url_path='tours', detail=True)
+    def tour(self, request, pk):
+        tours = self.get_object().tour_set.filter(active=True).all()
+        return Response(serializers.TourSerializer(tours, many=True, context={'request':request}).data, status.HTTP_200_OK)
 
 class DestinationViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Destination.objects.filter(active=True)
