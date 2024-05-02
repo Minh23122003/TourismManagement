@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import *
-from .paginators import NewsPaginator
+from .paginators import NewsPaginator, TourPaginator
 
 class StaffViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView,
                    generics.RetrieveAPIView, generics.DestroyAPIView, generics.UpdateAPIView):
@@ -43,7 +43,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView,
 
     queryset = Tour.objects.filter(active=True)
     serializer_class = serializers.TourDetailsSerializer
-    pagination_class = paginators.TourPaginator
+    pagination_class = TourPaginator
 
     # lấy tour theo trường
     # example: url= .../?start_date=02-05-2024&price_adult=100000
