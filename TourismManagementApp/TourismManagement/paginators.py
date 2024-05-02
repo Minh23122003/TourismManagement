@@ -1,4 +1,4 @@
-from rest_framework import pagination
+from rest_framewo import pagination
 
 
 class NewsPaginator(pagination.PageNumberPagination):

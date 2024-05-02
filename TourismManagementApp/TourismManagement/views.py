@@ -42,7 +42,8 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView,
                   generics.CreateAPIView, generics.DestroyAPIView, generics.UpdateAPIView):
 
     queryset = Tour.objects.filter(active=True)
-    serializer_class = serializers.TourSerializer
+    serializer_class = serializers.TourDetailsSerializer
+    pagination_class = paginators.TourPaginator
 
     # lấy tour theo trường
     # example: url= .../?start_date=02-05-2024&price_adult=100000
@@ -204,11 +205,18 @@ class TourCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView,
     queryset = TourCategory.objects.filter(active=True)
     serializer_class = serializers.TourCategorySerializer
 
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
+    def get_queryset(self):
+        queries = self.queryset
+        q = self.request.query_params.get('q')
+        if q:
+            queries = queries.filter(name__icontains=q)
 
-        return [permissions.IsAuthenticated()]
+        return queries
+
+    @action(methods=['get'], url_path='tours', detail=True)
+    def tour(self, request, pk):
+        tours = self.get_object().tour_set.filter(active=True).all()
+        return Response(serializers.TourSerializer(tours, many=True, context={'request':request}).data, status.HTTP_200_OK)
 
 
 class DestinationViewSet(viewsets.ViewSet, generics.CreateAPIView,
