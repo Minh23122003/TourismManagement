@@ -62,6 +62,14 @@ class Destination(BaseModel):
         return f'{self.name} - {self.location}'
 
 
+class TourImage(BaseModel):
+    name = models.CharField(max_length=100)
+    image = CloudinaryField(null=False)
+
+    def __str__(self):
+        return self.name
+
+
 class Tour(BaseModel):
     name = models.CharField(max_length=150)
     start_date = models.DateTimeField(null=False)
@@ -72,6 +80,7 @@ class Tour(BaseModel):
     quantity_ticket = models.IntegerField()
     tour_category = models.ForeignKey(TourCategory, on_delete=models.CASCADE)
     destination = models.ManyToManyField(Destination)
+    tour_image = models.ManyToManyField(TourImage)
 
     def __str__(self):
         return self.name
@@ -85,15 +94,6 @@ class Booking(BaseModel):
 
     def __str__(self):
         return f'{self.customer_id} - {self.tour_id}'
-
-
-class TourImage(BaseModel):
-    name = models.CharField(max_length=100)
-    image = CloudinaryField(null=False)
-    tour = models.ForeignKey(Tour, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.name
 
 
 class Bill(BaseModel):
@@ -129,23 +129,23 @@ class NewsCategory(BaseModel):
         return self.name
 
 
+class NewsImage(BaseModel):
+    name = models.CharField(max_length=100, null=False)
+    image = CloudinaryField(null=False)
+
+    def __str__(self):
+        return self.name
+
+
 class News(BaseModel):
     title = models.CharField(max_length=100)
     content = RichTextField()
     news_category = models.ForeignKey(NewsCategory, on_delete=models.CASCADE)
+    news_image = models.ManyToManyField(NewsImage)
     admin = models.ForeignKey(Admin, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
-
-
-class NewsImage(BaseModel):
-    name = models.CharField(max_length=100, null=False)
-    image = CloudinaryField(null=False)
-    news = models.ForeignKey(News, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.name
 
 
 class Like(BaseModel):
@@ -177,27 +177,3 @@ class Report(BaseModel):
 
     def __str__(self):
         return str(self.start_date)
-
-
-
-# tc1 = TourCategory(name='Viet Nam')
-# tc1.save()
-# tc1 = TourCategory(name='Chau A')
-# tc1.save()
-# tc1 = TourCategory(name='Chau Au')
-# tc1.save()
-# tc1 = TourCategory(name='Chau My')
-# tc1.save()
-# tc1 = TourCategory(name='Chau Phi')
-# tc1.save()
-# tc1 = TourCategory(name='Chau Uc')
-# tc1.save()
-
-# u1 = User(username='admin', email='admin@gmail.com', password='pbkdf2_sha256$720000$ybIgzYuBkpJ2n1Dv8v1Fxt$o9lssmkMEZ80So+JBqi6DcEQzOMI2LJNu185NZboGiY=', is_superuser=True, is_staff=True)
-# u2 = User(username='staff', email='staff@gmail.com', password='pbkdf2_sha256$720000$ybIgzYuBkpJ2n1Dv8v1Fxt$o9lssmkMEZ80So+JBqi6DcEQzOMI2LJNu185NZboGiY=', is_staff=True)
-# u3 = User(username='customer', email='customer@gmail.com', password='pbkdf2_sha256$720000$ybIgzYuBkpJ2n1Dv8v1Fxt$o9lssmkMEZ80So+JBqi6DcEQzOMI2LJNu185NZboGiY=')
-# u1.save()
-# u2.save()
-# u3.save()
-
-# d = Destination()

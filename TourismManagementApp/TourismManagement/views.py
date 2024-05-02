@@ -3,9 +3,8 @@ from requests import Response
 from rest_framework import viewsets, generics, permissions, status, mixins
 from TourismManagement import serializers
 from rest_framework.decorators import action
-
 from .models import *
-
+from TourismManagement import paginators
 
 class StaffViewSet(viewsets.ViewSet):
     serializer_class = serializers.StaffSerializer
@@ -35,6 +34,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView):
 
     queryset = Tour.objects.filter(active=True)
     serializer_class = serializers.TourSerializer
+    pagination_class = paginators.TourPaginator
 
     @action(methods=['get'], detail=True,
             name='Get ratings per tour',
