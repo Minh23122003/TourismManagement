@@ -8,38 +8,37 @@ from rest_framework.response import Response
 from .models import *
 from .paginators import NewsPaginator, TourPaginator
 
-class StaffViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView,
-                   generics.RetrieveAPIView, generics.DestroyAPIView, generics.UpdateAPIView):
+class StaffViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.RetrieveAPIView, generics.UpdateAPIView):
     queryset = Staff.objects.filter(active=True)
     serializer_class = serializers.StaffSerializer
+    permission_classes = [permissions.IsAdminUser]
 
-
-class CustomerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView,
-                      generics.DestroyAPIView, generics.UpdateAPIView, generics.RetrieveAPIView):
+class CustomerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
 
     serializer_class = serializers.CustomerSerializer
     queryset = Customer.objects.filter(active=True)
-    permission_classes = [permissions.IsAuthenticated]
 
+    #
+    #
+    # POST == 'Allow Any vì user có thể là guest
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
-class AdminViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView,
-                   generics.DestroyAPIView, generics.UpdateAPIView, generics.RetrieveAPIView):
-
+class AdminViewSet(viewsets.ViewSet):
     queryset = Admin.objects.filter(active=True)
     serializer_class = serializers.AdminSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdminUser()]
 
 
-class ReportViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView,
-                    generics.RetrieveAPIView, generics.DestroyAPIView, generics.UpdateAPIView):
-
+class ReportViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPIView):
     serializer_class = serializers.ReportSerializer
     queryset = Report.objects.filter(active=True)
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdminUser()]
 
 
-class TourViewSet(viewsets.ViewSet, generics.ListAPIView,
-                  generics.CreateAPIView, generics.DestroyAPIView, generics.UpdateAPIView):
+class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView):
 
     queryset = Tour.objects.filter(active=True)
     serializer_class = serializers.TourDetailsSerializer
@@ -185,11 +184,11 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView,
         if self.request.method == 'GET':
             return [permissions.AllowAny()]
 
-        return [permissions.IsAuthenticated()]
+        return [permissions.IsAdminUser()]
 
 
 class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView,
-                       generics.ListAPIView, generics.DestroyAPIView):
+                       generics.ListAPIView, generics.UpdateAPIView):
     queryset = TourImage.objects.filter(active=True)
     serializer_class = serializers.TourImageSerializer
 
@@ -197,13 +196,18 @@ class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView,
         if self.request.method == 'GET':
             return [permissions.AllowAny()]
 
-        return [permissions.IsAuthenticated()]
+        return [permissions.IsAdminUser()]
 
 
 class TourCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView,
-                          generics.ListAPIView, generics.DestroyAPIView):
+                          generics.ListAPIView, generics.UpdateAPIView):
     queryset = TourCategory.objects.filter(active=True)
     serializer_class = serializers.TourCategorySerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        return [permissions.IsAdminUser()]
 
     def get_queryset(self):
         queries = self.queryset
@@ -220,7 +224,7 @@ class TourCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView,
 
 
 class DestinationViewSet(viewsets.ViewSet, generics.CreateAPIView,
-                         generics.ListAPIView, generics.DestroyAPIView):
+                         generics.ListAPIView, generics.UpdateAPIView):
 
     queryset = Destination.objects.filter(active=True)
     serializer_class = serializers.DestinationSerializer
@@ -228,28 +232,24 @@ class DestinationViewSet(viewsets.ViewSet, generics.CreateAPIView,
     def get_permissions(self):
         if self.request.method == 'GET':
             return [permissions.AllowAny()]
+        return [permissions.IsAdminUser()]
 
-        return [permissions.IsAuthenticated()]
 
-
-class BookingViewSet(viewsets.ViewSet, generics.ListAPIView, generics.DestroyAPIView,
-                     generics.RetrieveAPIView, generics.CreateAPIView, generics.UpdateAPIView):
+class BookingViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView):
 
     queryset = Booking.objects.filter(active=True)
     serializer_class = serializers.BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
-class BillViewSet(viewsets.ViewSet, generics.ListAPIView, generics.DestroyAPIView,
-                  generics.RetrieveAPIView, generics.CreateAPIView, generics.UpdateAPIView):
+class BillViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView):
 
     queryset = Bill.objects.filter(active=True)
     serializer_class = serializers.BillSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
-class NewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView,
-                  generics.RetrieveAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+class NewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.RetrieveAPIView, generics.UpdateAPIView):
 
     queryset = News.objects.filter(active=True)
     serializer_class = serializers.NewsSerializer
@@ -258,12 +258,10 @@ class NewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView
     def get_permissions(self):
         if self.request.method == 'GET':
             return [permissions.AllowAny()]
-
         return [permissions.IsAuthenticated()]
 
 
-class NewsImageViewSet(viewsets.ViewSet, generics.CreateAPIView,
-                       generics.ListAPIView, generics.DestroyAPIView):
+class NewsImageViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
     queryset = NewsImage.objects.filter(active=True)
     serializer_class = serializers.NewsImageSerializer
 
@@ -274,8 +272,7 @@ class NewsImageViewSet(viewsets.ViewSet, generics.CreateAPIView,
         return [permissions.IsAuthenticated()]
 
 # Không có retrieve vì news category, tour category chỉ tỏng để thống kê
-class NewsCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView,
-                          generics.ListAPIView, generics.DestroyAPIView):
+class NewsCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
     queryset = NewsCategory.objects.filter(active=True)
     serializer_class = serializers.NewsCategorySerializer
 
@@ -287,8 +284,7 @@ class NewsCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView,
 
 
 # rating  cũng tương tự như tour category, news category
-class RatingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView,
-                    generics.UpdateAPIView, generics.DestroyAPIView):
+class RatingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
     serializer_class = serializers.RatingSerializer
     queryset = Rating.objects.filter(active=True)
 
@@ -301,8 +297,7 @@ class RatingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIVi
 
 
 # like cũng tương tự như tour category, news category
-class LikeViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView,
-                  generics.DestroyAPIView):
+class LikeViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
     serializer_class = serializers.LikeSerializer
     queryset = Like.objects.filter(active=True)
 
@@ -313,8 +308,7 @@ class LikeViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView
         return [permissions.IsAuthenticated()]
 
 
-class CommentTourViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView,
-                         generics.DestroyAPIView):
+class CommentTourViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
     queryset = CommentTour.objects.filter(active=True)
     serializer_class = serializers.CommentTourSerializer
 
@@ -325,8 +319,7 @@ class CommentTourViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.List
         return [permissions.IsAuthenticated()]
 
 
-class CommentNewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView,
-                        generics.DestroyAPIView):
+class CommentNewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
     queryset = CommentNews.objects.filter(active=True)
     serializer_class = serializers.CommentNewsSerializer
 
