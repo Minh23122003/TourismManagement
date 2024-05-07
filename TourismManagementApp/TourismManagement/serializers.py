@@ -65,10 +65,11 @@ class TourImageSerializer(ItemSerializer):
 
 class TourDetailsSerializer(TourSerializer):
     tour_image = TourImageSerializer(many=True)
+    destination = DestinationSerializer(many=True)
 
     class Meta:
         model = TourSerializer.Meta.model
-        fields = TourSerializer.Meta.fields + ['tour_image']
+        fields = TourSerializer.Meta.fields + ['tour_image'] + ['destination']
 
 
 class TourCategorySerializer(serializers.ModelSerializer):

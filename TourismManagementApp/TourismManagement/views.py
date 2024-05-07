@@ -1,12 +1,10 @@
-from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404
-from rest_framework import viewsets, generics, permissions, status, mixins
-from TourismManagement import serializers
+from rest_framework import viewsets, generics, permissions, status
+from TourismManagement import serializers, paginators
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
 from .models import *
-from .paginators import NewsPaginator, TourPaginator
+from datetime import datetime
+
 
 class StaffViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.RetrieveAPIView, generics.UpdateAPIView):
     queryset = Staff.objects.filter(active=True)
@@ -42,111 +40,26 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
 
     queryset = Tour.objects.filter(active=True)
     serializer_class = serializers.TourDetailsSerializer
-    pagination_class = TourPaginator
+    pagination_class = paginators.TourPaginator
 
-    # lấy tour theo trường
-    # example: url= .../?start_date=02-05-2024&price_adult=100000
-    # example url= .../?start_date=02-05-2024
-    # Api dùng cho chứng năng lọc chi tiết tour: giá, ngày, chuyến đi
-    # xét 5 fields có 25 cases
-    def retrieve(self, request, pk=None):
+    def get_queryset(self):
+        queries = self.queryset
+        if self.action.__eq__('list'):
+            price_min = self.request.query_params.get('price_min')
+            if price_min:
+                queries = queries.filter(price_adult__gte=int(price_min))
+            price_max = self.request.query_params.get('price_max')
+            if price_max:
+                queries = queries.filter(price_adult__lte=int(price_max))
+            start_date = self.request.query_params.get('start_date')
+            if start_date:
+                queries = queries.filter(start_date__gt=datetime.strptime(start_date, '%d-%m-%Y'))
+            destination = self.request.query_params.get('destination')
+            destination = Destination.objects.filter(location=destination)
+            if destination:
+                queries = queries.filter(destination__in=destination).distinct()
+        return queries
 
-        if request.get('destination'):
-            destination = request.get('destination')
-            tour = Tour.objects.filter(destination=destination)
-            if tour.get('start_date'):
-                date = tour.get('start_date')
-                tour = tour.filter(start_date=date)
-                if tour.get('end_date'):
-                    date = tour.get('end_date')
-                    tour = tour.filter(end_date=date)
-                    if tour.get('price_adult'):
-                        price = tour.get('price_adult')
-                        tour = tour.filter(price_adult=price)
-                    if tour.get('price_children'):
-                        price = tour.get('price_children')
-                        tour = tour.filter(price_children=price)
-
-            serializer = serializers.TourSerializer(tour, many=True)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-        if request.get('start_date'):
-            date = request.get('start_date')
-            tour = Tour.objects.filter(start_date=date)
-            if request.get('end_date'):
-                date = request.get('end_date')
-                tour = tour.filter(end_date=date)
-                if request.get('price_adult'):
-                    price = request.get('price_adult')
-                    tour = tour.filter(price_adult=price)
-                    if tour.get('price_children'):
-                        price = request.get('price_children')
-                        tour = tour.filter(price_children=price)
-                        if tour.get('destination'):
-                            destination = request.get('destination')
-                            tour = tour.filter(destination=destination)
-
-            serializer = serializers.TourSerializer(tour, many=True)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-        if request.get('end_date'):
-            date = request.get('end_date')
-            tour = Tour.objects.filter(end_date=date)
-            if request.get('start_date'):
-                date = request.get('start_date')
-                tour = tour.filter(start_date=date)
-                if request.get('price_children'):
-                    price = request.get('price_children')
-                    tour = tour.filter(price_children=price)
-                    if request.get('price_adult'):
-                        price = request.get('price_adult')
-                        tour = tour.filter(price_adult=price)
-                        if tour.get('destination'):
-                            destination = request.get('destination')
-                            tour = tour.filter(destination=destination)
-
-            serializer = serializers.TourSerializer(tour, many=True)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-        if request.get('price_adult'):
-            price = request.get('price_adult')
-            tour = Tour.objects.filter(price_adult=price)
-            if request.get('price_children'):
-                price = request.get('price_children')
-                tour = tour.filter(price_children=price)
-                if request.get('start_date'):
-                    date = request.get('start_date')
-                    tour = tour.filter(start_date=date)
-                    if request.get('end_date'):
-                        date = request.get('end_date')
-                        tour = tour.filter(end_date=date)
-                        if tour.get('destination'):
-                            destination = request.get('destination')
-                            tour = tour.filter(destination=destination)
-
-            serializer = serializers.TourSerializer(tour, many=True)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-        if request.get('price_children'):
-            price = request.get('price_children')
-            tour = Tour.objects.filter(price_children=price)
-            if request.get('price_adult'):
-                price = request.get('price_adult')
-                tour = tour.filter(price_adult=price)
-                if request.get('start_date'):
-                    date = request.get('start_date')
-                    tour = tour.filter(start_date=date)
-                    if request.get('end_date'):
-                        date = request.get('end_date')
-                        tour = tour.filter(end_date=date)
-                        if tour.get('destination'):
-                            destination = request.get('destination')
-                            tour = tour.filter(destination=destination)
-
-            serializer = serializers.TourSerializer(tour, many=True)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-        return Response(status=status.HTTP_404_NOT_FOUND)
     @action(methods=['get'], detail=True,
             name='Get ratings per tour',
             url_path='ratings',
@@ -189,7 +102,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
 
 class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView,
                        generics.ListAPIView, generics.UpdateAPIView):
-    queryset = TourImage.objects.filter(active=True)
+    queryset = TourImage.objects.filter(active=True).all()
     serializer_class = serializers.TourImageSerializer
 
     def get_permissions(self):
@@ -201,7 +114,7 @@ class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView,
 
 class TourCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView,
                           generics.ListAPIView, generics.UpdateAPIView):
-    queryset = TourCategory.objects.filter(active=True)
+    queryset = TourCategory.objects.filter(active=True).all()
     serializer_class = serializers.TourCategorySerializer
 
     def get_permissions(self):
@@ -211,10 +124,10 @@ class TourCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView,
 
     def get_queryset(self):
         queries = self.queryset
-        q = self.request.query_params.get('q')
-        if q:
-            queries = queries.filter(name__icontains=q)
-
+        if self.action.__eq__('list'):
+            q = self.request.query_params.get('q')
+            if q:
+                queries = queries.filter(name__icontains=q)
         return queries
 
     @action(methods=['get'], url_path='tours', detail=True)
@@ -253,7 +166,7 @@ class NewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView
 
     queryset = News.objects.filter(active=True)
     serializer_class = serializers.NewsSerializer
-    pagination_class = NewsPaginator
+    pagination_class = paginators.NewsPaginator
 
     def get_permissions(self):
         if self.request.method == 'GET':
