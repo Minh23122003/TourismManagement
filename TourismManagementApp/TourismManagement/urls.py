@@ -21,6 +21,7 @@ r.register('comments-tour', views.CommentTourViewSet, basename='comments-tour')
 r.register('comments-news', views.CommentNewsViewSet, basename='comments-news')
 r.register('like', views.LikeViewSet, basename='like')
 r.register('rating', views.RatingViewSet, basename='rating')
+r.register('user', views.UserViewSet, basename='user')
 
 
 

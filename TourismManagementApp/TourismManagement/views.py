@@ -1,4 +1,4 @@
-from rest_framework import viewsets, generics, permissions, status
+from rest_framework import viewsets, generics, permissions, status, parsers
 from TourismManagement import serializers, paginators
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -58,6 +58,9 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
             destination = Destination.objects.filter(location=destination)
             if destination:
                 queries = queries.filter(destination__in=destination).distinct()
+            id = self.request.query_params.get('id')
+            if id:
+                queries = queries.filter(id=int(id))
         return queries
 
     @action(methods=['get'], detail=True,
@@ -100,8 +103,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
         return [permissions.IsAdminUser()]
 
 
-class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView,
-                       generics.ListAPIView, generics.UpdateAPIView):
+class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView,generics.ListAPIView, generics.UpdateAPIView):
     queryset = TourImage.objects.filter(active=True).all()
     serializer_class = serializers.TourImageSerializer
 
@@ -112,23 +114,14 @@ class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView,
         return [permissions.IsAdminUser()]
 
 
-class TourCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView,
-                          generics.ListAPIView, generics.UpdateAPIView):
-    queryset = TourCategory.objects.filter(active=True).all()
+class TourCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView,generics.ListAPIView, generics.UpdateAPIView):
+    queryset = TourCategory.objects.filter(active=True)
     serializer_class = serializers.TourCategorySerializer
 
     def get_permissions(self):
         if self.request.method == 'GET':
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
-
-    def get_queryset(self):
-        queries = self.queryset
-        if self.action.__eq__('list'):
-            q = self.request.query_params.get('q')
-            if q:
-                queries = queries.filter(name__icontains=q)
-        return queries
 
     @action(methods=['get'], url_path='tours', detail=True)
     def tour(self, request, pk):
@@ -241,3 +234,14 @@ class CommentNewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.List
             return [permissions.AllowAny()]
 
         return [permissions.IsAuthenticated()]
+
+
+class UserViewSet(viewsets.ViewSet, generics.ListAPIView):
+    queryset = User.objects.filter(is_active=True)
+    serializers = serializers.UserSerializer
+    parser_classes = [parsers.MultiPartParser]
+
+    def get_permissions(self):
+        if self.action in ['get_current_user']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]

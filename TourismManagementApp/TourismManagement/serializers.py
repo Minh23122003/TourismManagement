@@ -120,6 +120,30 @@ class NewsCategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class UserSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        rep = super().to_representation((instance))
+        rep['avatar'] = instance.avatar.url
+
+        return rep
+
+    def create(self, validated_data):
+        data = validated_data.copy()
+        user = User(**data)
+        user.set_password(data["password"])
+        user.save()
+
+        return user
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'password']
+        extra_kwargs = {
+            'password': {
+                'write_only': True
+            }
+        }
+
+
 
 
 

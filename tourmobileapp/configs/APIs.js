@@ -4,8 +4,8 @@ import axios from "axios";
 const BASE_URL = 'http://192.168.1.5:8000/'
 
 export const endpoints = {
-    'tour': '/tour/',
-    'destination': '/destination/'
+    'tours': '/tours/',
+    'tour-details': (tourId) => `/tours/?id=${tourId}`
 }
 
 export default axios.create({
