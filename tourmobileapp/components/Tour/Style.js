@@ -7,11 +7,14 @@ export default StyleSheet.create({
         marginTop:20,
     },
     row: {
-        flexDirection:"row"
+        flexDirection:"row",
+        flexWrap:"wrap"
     }, text:{
         marginTop:10,
         alignItems:"center",
         fontSize:25,
         fontWeight:"bold"
+    }, margin: {
+        margin:5
     }
 })

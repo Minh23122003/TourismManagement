@@ -1,49 +1,98 @@
 import React from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native"
+import { Image, ScrollView, Text, TouchableOpacity, View, RefreshControl } from "react-native"
 import APIs, { endpoints } from "../../configs/APIs";
-import { ActivityIndicator, List } from "react-native-paper";
+import { ActivityIndicator, List, Chip, Searchbar } from "react-native-paper";
 import Style from "./Style";
 import TourDetails from "./TourDetails";
+import { isCloseToBottom } from "../Utils/Utils";
 
 
 const Tour = ({route, navigation}) => {
     const [tours, setTours] = React.useState([]);
-    React.useEffect( () => {
-        const loadTours = async () => {
+    const [loading, setLoading] = React.useState(false);
+    const [categories, setCategories] = React.useState(null)
+    const [cateId, setCateId] = React.useState("")
+    const [page, setPage] = React.useState(1)
+    const [priceMin, setPriceMin] = React.useState("");
+    const [priceMax, setPriceMax] = React.useState("");
+    const [date, setDate] = React.useState("");
+    const [destination, setDestination] = React.useState("");
+    
+    const loadTours = async () => {
+        if (page > 0){
+            let url = `${endpoints["tours"]}?page=${page}&&price_min=${priceMin}&&price_max=${priceMax}&&start_date=${date}&&cate_id=${cateId}&&destination=${destination}`
             try {
-                let res = await APIs.get(endpoints["tours"]);
-                setTours(res.data.results);
+                setLoading(true)
+                let res = await APIs.get(url);
+                if (page===1)
+                    setTours(res.data.results);
+                else if (page > 1)
+                    setTours(current => {return [...current, ...res.data.results]})
+                if (res.data.next===null)
+                    setPage(0);
             } catch (ex) {
                 console.error(ex);
+            } finally {
+                setLoading(false)
             }
         }
+    }
+
+    const loadCategories = async () => {
+        try {
+            let res = await APIs.get(endpoints["cateTours"]);
+            setCategories(res.data);
+        } catch (ex) {
+            console.error(ex);
+        }
+    }
+
+    React.useEffect(() => {
         loadTours();
-    });
+    }, [page, priceMin, priceMax, date, cateId, destination])
+
+    React.useEffect(() => {
+        loadCategories();
+    }, [])
+
+    const loadMore = ({nativeEvent}) => {
+        if (loading===false && isCloseToBottom(nativeEvent)) {
+            setPage(page+1);
+        }
+    }
 
     const goToDetails = (tourId) => {
         navigation.navigate("TourDetails", {"tourId": tourId})
     }
+
+    const search = (value, callback) => {
+        setPage(1);
+        callback(value);
+    }
     
     return (
-        <View style={{alignItems:"center"}}>
-            <Text style={{fontSize:30, fontWeight:"bold"}}>Danh sach tour du lich</Text>
-            <ScrollView>
-                {tours === null ? <ActivityIndicator /> : <>
-                {
-                    tours.map(t => (
-                        <View key={t.id}>
-                            <TouchableOpacity style={Style.row} onPress={() => {goToDetails(t.id)}}>
-                                <Image source={{ uri : t.tour_image[0].image}} style={Style.img} />   
-                                <View style={{justifyContent:"center"}}>
-                                    <Text style={Style.text}>{t.name}</Text>
-                                </View>                         
-                            </TouchableOpacity>
-                        </View>
-                    ))
-                }
+        <ScrollView style={Style.margin}>
+            <View style={Style.row}>
+                <Chip onPress={() => search("", setCateId)} mode={!cateId?"outlined":"flat"} style={Style.margin} icon="shape-outline">Tất cả</Chip>
+                {categories===null?<ActivityIndicator />: <>
+                    {categories.map(c => <Chip onPress={() => search(c.id, setCateId)} mode={cateId===c.id?"outlined":"flat"} key={c.id} style={Style.margin} icon="shape-outline">{c.name}</Chip>)}
                 </>}
+            </View>
+            <View>
+                <Searchbar placeholder="Tim gia thap nhat" value={priceMin} onChangeText={t => search(t, setPriceMin)} />
+                <Searchbar placeholder="Tim gia cao nhat nhat" value={priceMax} onChangeText={t => search(t, setPriceMax)} />
+                <Searchbar placeholder="Tim ngay di: dd-mm-yyyy" value={date} onChangeText={t => search(t, setDate)} />
+                <Searchbar placeholder="Nhap diem den" value={destination} onChangeText={t => search(t, setDestination)} />
+            </View>
+            <Text style={{fontSize:30, fontWeight:"bold"}}>Danh sach tour du lich</Text>
+            <ScrollView onScroll={loadMore}>
+                {loading && <ActivityIndicator />}
+                {tours.map(t => <TouchableOpacity key={t.id} onPress={() => navigation.navigate('TourDetails', {'tourId': t.id})}>
+                    <List.Item style={Style.margin} title={t.name} left={() => <Image style={Style.img} source={{uri : t.tour_image[0].image}} />} />
+                </TouchableOpacity>)}
+                {loading && page > 1 && <ActivityIndicator/>}
             </ScrollView>
-        </View>
+        </ScrollView>
     )
 }
 

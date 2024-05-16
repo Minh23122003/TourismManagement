@@ -52,8 +52,11 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
             if price_max:
                 queries = queries.filter(price_adult__lte=int(price_max))
             start_date = self.request.query_params.get('start_date')
-            if start_date:
-                queries = queries.filter(start_date__gt=datetime.strptime(start_date, '%d-%m-%Y'))
+            try:
+                if start_date:
+                    queries = queries.filter(start_date__gt=datetime.strptime(start_date, '%d-%m-%Y'))
+            except:
+                queries = queries
             destination = self.request.query_params.get('destination')
             destination = Destination.objects.filter(location=destination)
             if destination:
@@ -61,6 +64,9 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
             id = self.request.query_params.get('id')
             if id:
                 queries = queries.filter(id=int(id))
+            cate_id = self.request.query_params.get('cate_id')
+            if cate_id:
+                queries = queries.filter(tour_category_id=cate_id)
         return queries
 
     @action(methods=['get'], detail=True,

@@ -5,4 +5,4 @@ class NewsPaginator(pagination.PageNumberPagination):
     page_size = 20
 
 class TourPaginator(pagination.PageNumberPagination):
-    page_size = 20
+    page_size = 4
