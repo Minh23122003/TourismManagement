@@ -11,7 +11,7 @@ class StaffViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIVie
     serializer_class = serializers.StaffSerializer
     permission_classes = [permissions.IsAdminUser]
 
-class CustomerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
+class CustomerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView, generics.ListAPIView):
 
     serializer_class = serializers.CustomerSerializer
     queryset = Customer.objects.filter(active=True)
@@ -20,7 +20,7 @@ class CustomerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateA
     #
     # POST == 'Allow Any vì user có thể là guest
     def get_permissions(self):
-        if self.request.method == 'POST':
+        if self.request.method == 'POST' or self.request.method=='GET':
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
@@ -71,8 +71,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
 
     @action(methods=['get'], detail=True,
             name='Get ratings per tour',
-            url_path='ratings',
-            url_name='ratings'
+            url_path='get-ratings',
             )
     def get_rating(self, request, pk):
         try:
@@ -85,8 +84,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
 
     @action(methods=['post'], detail=True,
             name='Post ratings per tour',
-            url_path='ratings',
-            url_name='ratings'
+            url_path='post-ratings',
             )
     def post_rating(self, request, pk):
         try:
@@ -120,7 +118,7 @@ class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView,generics.ListAPI
         return [permissions.IsAdminUser()]
 
 
-class TourCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView,generics.ListAPIView, generics.UpdateAPIView):
+class TourCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
     queryset = TourCategory.objects.filter(active=True)
     serializer_class = serializers.TourCategorySerializer
 
@@ -129,7 +127,7 @@ class TourCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView,generics.List
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
 
-    @action(methods=['get'], url_path='tours', detail=True)
+    @action(methods=['get'], url_path='tours', detail=False)
     def tour(self, request, pk):
         tours = self.get_object().tour_set.filter(active=True).all()
         return Response(serializers.TourSerializer(tours, many=True, context={'request':request}).data, status.HTTP_200_OK)
@@ -196,7 +194,7 @@ class NewsCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Lis
 
 
 # rating  cũng tương tự như tour category, news category
-class RatingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
+class RatingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
     serializer_class = serializers.RatingSerializer
     queryset = Rating.objects.filter(active=True)
 
@@ -209,10 +207,19 @@ class RatingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIVi
 
 
 # like cũng tương tự như tour category, news category
-class LikeViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
+class LikeViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
     serializer_class = serializers.LikeSerializer
     queryset = Like.objects.filter(active=True)
 
+    def partial_update(self, request, pk=None):
+        like_object = self.get_object()
+        serializer = self.get_serializer(like_object, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def get_permissions(self):
         if self.request.method == 'GET':
             return [permissions.AllowAny()]
@@ -220,10 +227,20 @@ class LikeViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView
         return [permissions.IsAuthenticated()]
 
 
-class CommentTourViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
+class CommentTourViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
     queryset = CommentTour.objects.filter(active=True)
     serializer_class = serializers.CommentTourSerializer
 
+    def partial_update(self, request, pk=None):
+        comment_object = self.get_object()
+        serializer = self.get_serializer(comment_object, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
     def get_permissions(self):
         if self.request.method == 'GET':
             return [permissions.AllowAny()]
@@ -231,9 +248,18 @@ class CommentTourViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.List
         return [permissions.IsAuthenticated()]
 
 
-class CommentNewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
+class CommentNewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
     queryset = CommentNews.objects.filter(active=True)
     serializer_class = serializers.CommentNewsSerializer
+
+    def partial_update(self, request, pk=None):
+        comment_object = self.get_object()
+        serializer = self.get_serializer(comment_object, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get_permissions(self):
         if self.request.method == 'GET':
@@ -244,7 +270,7 @@ class CommentNewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.List
 
 class UserViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = User.objects.filter(is_active=True)
-    serializers = serializers.UserSerializer
+    serializer_class = serializers.UserSerializer
     parser_classes = [parsers.MultiPartParser]
 
     def get_permissions(self):
