@@ -36,7 +36,7 @@ class ReportViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveA
     permission_classes = [permissions.IsAdminUser()]
 
 
-class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView):
+class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView):
 
     queryset = Tour.objects.filter(active=True)
     serializer_class = serializers.TourDetailsSerializer
@@ -69,13 +69,23 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
                 queries = queries.filter(tour_category_id=cate_id)
         return queries
 
+    def partial_update(self, request, pk=None):
+        tour_object = self.get_object()
+        serializer = self.get_serializer(tour_object, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
     @action(methods=['get'], detail=True,
             name='Get ratings per tour',
             url_path='get-ratings',
             )
     def get_rating(self, request, pk):
         try:
-            rating = Rating.objects.get(pk=pk)
+            rating = Rating.objects.filter(tour_id=pk).all()
 
             serializer = serializers.RatingSerializer(rating, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -88,17 +98,106 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
             )
     def post_rating(self, request, pk):
         try:
-            stars = request.data['stars']
-            tour_id = request.data['tour_id']
-            customer_id = request.user['id']
 
-            rating = Rating.objects.create(stars=stars, customer_id=customer_id, tour_id=tour_id)
+            data = request.data
+            rating = Rating()
+            rating.customer = Customer.objects.filter(id=data.get("customer")).first()
+            rating.stars = data.get("stars")
+            rating.tour= self.get_object()
             rating.save()
+            serializer = serializers.RatingSerializer(rating, request.data)
+            if serializer.is_valid(raise_exception=True):
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Rating.DoesNotExist as err:
+            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
 
-            serializer = serializers.RatingSerializer(rating)
+
+    @action(methods=['patch'], detail=True,
+            name='Update ratings per tour',
+            url_path='update-ratings/(?P<id>[^/.]+)',
+            )
+    def partial_update_rating(self, request, pk=None, id=None):
+        try:
+            rating = Rating.objects.get(id=int(id))
+            serializer = serializers.RatingSerializer(rating, data=request.data, partial=True)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Rating.DoesNotExist as err:
             return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
+
+    ###### ###### ##  ## ######
+      ##   ##  ## ##  ## ######
+      ##   ###### ###### ## ###
+    @action(methods=['get'], detail=True,
+            name='Get comment tour per tour',
+            url_path='get-comments',
+            )
+    def get_comment_tour(self, request, pk):
+        try:
+            comment = CommentTour.objects.filter(tour_id=pk).all()
+
+            serializer = serializers.CommentTourSerializer(comment, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Rating.DoesNotExist as err:
+            return Response(data={'message': err}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['post'], detail=True,
+            name='Post comment per tour',
+            url_path='post-comments',
+            )
+    def post_comment_tour(self, request, pk):
+        try:
+
+            data = request.data
+            comment = CommentTour()
+            comment.customer = Customer.objects.filter(id=data.get("customer")).first()
+            comment.content = data.get("content")
+            comment.tour = self.get_object()
+            comment.save()
+            serializer = serializers.CommentTourSerializer(comment, request.data)
+            if serializer.is_valid(raise_exception=True):
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Rating.DoesNotExist as err:
+            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['patch'], detail=True,
+            name='Update comment per tour',
+            url_path='update-comments/(?P<id>[^/.]+)',
+            )
+    def partial_update_comment_tour(self, request, pk=None, id=None):
+        try:
+            comment = CommentTour.objects.get(id=int(id))
+            serializer = serializers.CommentTourSerializer(comment, data=request.data, partial=True)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Rating.DoesNotExist as err:
+            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
+
+
+    @action(methods=['delete'], detail=True,
+            name='Delete comment per tour',
+            url_path='delete-comments/(?P<id>[^/.]+)',
+            )
+    def delete_comment_tour(self, request, pk=None, id=None):
+        try:
+            comment = CommentTour.objects.filter(id=int(id)).first()
+            comment.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Rating.DoesNotExist as err:
+            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+
+
 
     def get_permissions(self):
         if self.request.method == 'GET':
@@ -107,7 +206,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
         return [permissions.IsAdminUser()]
 
 
-class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView,generics.ListAPIView, generics.UpdateAPIView):
+class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView,generics.ListAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = TourImage.objects.filter(active=True).all()
     serializer_class = serializers.TourImageSerializer
 
@@ -164,6 +263,115 @@ class NewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView
     queryset = News.objects.filter(active=True)
     serializer_class = serializers.NewsSerializer
     pagination_class = paginators.NewsPaginator
+
+    @action(methods=['get'], detail=True,
+            name='Get likes per tour',
+            url_path='get-likes',
+            )
+    def get_like(self, request, pk):
+        try:
+            like = Like.objects.filter(news_id=pk).all()
+
+            serializer = serializers.LikeSerializer(like, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Rating.DoesNotExist as err:
+            return Response(data={'message': err}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['post'], detail=True,
+            name='Post likes per tour',
+            url_path='post-likes',
+            )
+    def post_like(self, request, pk):
+        try:
+            data = request.data
+            like = Like()
+            like.customer = Customer.objects.filter(id=data.get("customer")).first()
+            like.news = self.get_object()
+            like.save()
+            serializer = serializers.LikeSerializer(like, request.data)
+            if serializer.is_valid(raise_exception=True):
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Rating.DoesNotExist as err:
+            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['patch'], detail=True,
+            name='Update likes per tour',
+            url_path='update-likes/(?P<id>[^/.]+)',
+            )
+    def partial_update_like(self, request, pk=None, id=None):
+        try:
+            like = Like.objects.get(id=int(id))
+            serializer = serializers.LikeSerializer(like, data=request.data, partial=True)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Rating.DoesNotExist as err:
+            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
+
+  ###### ###### ##  ## ######
+    ##   ##  ## ##  ## ######
+    ##   ###### ###### ## ###
+    @action(methods=['get'], detail=True,
+            name='Get comment tour per tour',
+            url_path='get-comments',
+            )
+    def get_comment_news(self, request, pk):
+        try:
+            comment = CommentNews.objects.filter(news_id=pk).all()
+
+            serializer = serializers.CommentNewsSerializer(comment, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Rating.DoesNotExist as err:
+            return Response(data={'message': err}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['post'], detail=True,
+            name='Post comment per tour',
+            url_path='post-comments',
+            )
+    def post_comment_tour(self, request, pk):
+        try:
+
+            data = request.data
+            comment = CommentNews()
+            comment.customer = Customer.objects.filter(id=data.get("customer")).first()
+            comment.content = data.get("content")
+            comment.news = self.get_object()
+            comment.save()
+            serializer = serializers.CommentNewsSerializer(comment, request.data)
+            if serializer.is_valid(raise_exception=True):
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Rating.DoesNotExist as err:
+            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['patch'], detail=True,
+            name='Update ratings per tour',
+            url_path='update-comments/(?P<id>[^/.]+)',
+            )
+    def partial_update_comment_tour(self, request, pk=None, id=None):
+        try:
+            comment = CommentNews.objects.get(id=int(id))
+            serializer = serializers.CommentNewsSerializer(comment, data=request.data, partial=True)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Rating.DoesNotExist as err:
+            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['delete'], detail=True,
+            name='Delete ratings per tour',
+            url_path='delete-comments/(?P<id>[^/.]+)',
+            )
+    def delete_comment_tour(self, request, pk=None, id=None):
+        try:
+            comment = CommentNews.objects.filter(id=int(id)).first()
+            comment.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Rating.DoesNotExist as err:
+            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
 
     def get_permissions(self):
         if self.request.method == 'GET':
