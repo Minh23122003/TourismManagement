@@ -6,7 +6,7 @@ const BASE_URL = 'http://192.168.1.5:8000/'
 export const endpoints = {
     'cateTours': '/tours-category/',
     'tours': '/tours/',
-    'tour-details': (tourId) => `/tours/?id=${tourId}`
+    'tour-details': (tourId) => `/tours/${tourId}/`
 }
 
 export default axios.create({

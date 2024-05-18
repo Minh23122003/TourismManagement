@@ -20,33 +20,30 @@ class BaseModel(models.Model):
 
 
 class Admin(BaseModel):
-    name = models.CharField(max_length=100)
     address = models.CharField(max_length=110)
     phone = models.CharField(max_length=10)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.name
+    # def __str__(self):
+    #     return self.id
 
 
 class Staff(BaseModel):
-    name = models.CharField(max_length=100)
     address = models.CharField(max_length=100)
     phone = models.CharField(max_length=10)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.name
+    # def __str__(self):
+    #     return self.id
 
 
 class Customer(BaseModel):
-    name = models.CharField(max_length=100)
     address = models.CharField(max_length=100)
     phone = models.CharField(max_length=10)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.name
+    # def __str__(self):
+    #     return self.id
 
 
 class TourCategory(BaseModel):

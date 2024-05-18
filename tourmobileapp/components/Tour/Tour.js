@@ -1,7 +1,7 @@
 import React from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View, RefreshControl } from "react-native"
+import { Image, ScrollView, Text, TouchableOpacity, View, RefreshControl, ActivityIndicator } from "react-native"
 import APIs, { endpoints } from "../../configs/APIs";
-import { ActivityIndicator, List, Chip, Searchbar } from "react-native-paper";
+import { List, Chip, Searchbar } from "react-native-paper";
 import Style from "./Style";
 import TourDetails from "./TourDetails";
 import { isCloseToBottom } from "../Utils/Utils";
@@ -20,7 +20,7 @@ const Tour = ({route, navigation}) => {
     
     const loadTours = async () => {
         if (page > 0){
-            let url = `${endpoints["tours"]}?page=${page}&&price_min=${priceMin}&&price_max=${priceMax}&&start_date=${date}&&cate_id=${cateId}&&destination=${destination}`
+            let url = `${endpoints["tours"]}?price_min=${priceMin}&&price_max=${priceMax}&&start_date=${date}&&cate_id=${cateId}&&destination=${destination}&&page=${page}`
             try {
                 setLoading(true)
                 let res = await APIs.get(url);
@@ -61,17 +61,13 @@ const Tour = ({route, navigation}) => {
         }
     }
 
-    const goToDetails = (tourId) => {
-        navigation.navigate("TourDetails", {"tourId": tourId})
-    }
-
     const search = (value, callback) => {
         setPage(1);
         callback(value);
     }
     
     return (
-        <ScrollView style={Style.margin}>
+        <View style={[Style.margin, Style.container]}>
             <View style={Style.row}>
                 <Chip onPress={() => search("", setCateId)} mode={!cateId?"outlined":"flat"} style={Style.margin} icon="shape-outline">Tất cả</Chip>
                 {categories===null?<ActivityIndicator />: <>
@@ -79,20 +75,21 @@ const Tour = ({route, navigation}) => {
                 </>}
             </View>
             <View>
-                <Searchbar placeholder="Tim gia thap nhat" value={priceMin} onChangeText={t => search(t, setPriceMin)} />
-                <Searchbar placeholder="Tim gia cao nhat nhat" value={priceMax} onChangeText={t => search(t, setPriceMax)} />
-                <Searchbar placeholder="Tim ngay di: dd-mm-yyyy" value={date} onChangeText={t => search(t, setDate)} />
-                <Searchbar placeholder="Nhap diem den" value={destination} onChangeText={t => search(t, setDestination)} />
+                <Searchbar style={Style.margin} placeholder="Tim gia thap nhat" value={priceMin} onChangeText={t => search(t, setPriceMin)} />
+                <Searchbar style={Style.margin} placeholder="Tim gia cao nhat nhat" value={priceMax} onChangeText={t => search(t, setPriceMax)} />
+                <Searchbar style={Style.margin} placeholder="Tim ngay di: dd-mm-yyyy" value={date} onChangeText={t => search(t, setDate)} />
+                <Searchbar style={Style.margin} placeholder="Nhap diem den" value={destination} onChangeText={t => search(t, setDestination)} />
             </View>
             <Text style={{fontSize:30, fontWeight:"bold"}}>Danh sach tour du lich</Text>
             <ScrollView onScroll={loadMore}>
+                <RefreshControl onRefresh={() => loadTours()} />
                 {loading && <ActivityIndicator />}
-                {tours.map(t => <TouchableOpacity key={t.id} onPress={() => navigation.navigate('TourDetails', {'tourId': t.id})}>
+                {tours.map(t => <TouchableOpacity key={t.id} onPress={() => navigation.navigate('TourDetails', {tourId : t.id})}>
                     <List.Item style={Style.margin} title={t.name} left={() => <Image style={Style.img} source={{uri : t.tour_image[0].image}} />} />
                 </TouchableOpacity>)}
                 {loading && page > 1 && <ActivityIndicator/>}
             </ScrollView>
-        </ScrollView>
+        </View>
     )
 }
 
