@@ -12,28 +12,6 @@ class ItemSerializer(serializers.ModelSerializer):
         return rep
 
 
-class AdminSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Admin
-        exclude = ['user']
-
-
-class StaffSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Staff
-        exclude = ['user']
-
-class CustomerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Customer
-        exclude = ['user']
-
-class ReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Report
-        fields = '__all__'
-
-
 class DestinationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Destination
@@ -43,12 +21,6 @@ class DestinationSerializer(serializers.ModelSerializer):
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
-        fields = '__all__'
-
-
-class CommentTourSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CommentTour
         fields = '__all__'
 
 
@@ -72,22 +44,22 @@ class TourDetailsSerializer(TourSerializer):
         fields = TourSerializer.Meta.fields + ['tour_image'] + ['destination']
 
 
+class TourRating(TourDetailsSerializer):
+    rating = serializers.SerializerMethodField()
+
+    def get_rating(self, tour):
+        return tour.rating_set.filter(active=True).exists()
+
+    class Meta:
+        model = TourDetailsSerializer.Meta.model
+        fields = TourDetailsSerializer.Meta.fields + ['rating']
+
+
 class TourCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = TourCategory
         fields = ['id', 'name']
 
-
-class BookingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Booking
-        fields = '__all__'
-
-
-class BillSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Bill
-        fields = '__all__'
 
 
 class CommentNewsSerializer(serializers.ModelSerializer):
@@ -96,29 +68,38 @@ class CommentNewsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class LikeSerializer(serializers.ModelSerializer):
+class NewsImageSerializer(ItemSerializer):
     class Meta:
-        model = Like
-        fields = '__all__'
-
+        model = NewsImage
+        fields = ['id', 'name', 'image']
 
 class NewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
-        fields = '__all__'
+        fields = ['id', 'title', 'content', 'news_category_id']
 
 
-class NewsImageSerializer(ItemSerializer):
+class NewsDetailsSerializer(NewsSerializer):
+    news_image = NewsImageSerializer(many=True)
+
     class Meta:
-        model = NewsImage
-        fields = '__all__'
-
+        model = NewsSerializer.Meta.model
+        fields = NewsSerializer.Meta.fields + ['news_image']
 
 class NewsCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = NewsCategory
-        fields = '__all__'
+        fields = ['id', 'name']
 
+
+class NewsLike(NewsSerializer):
+    like = serializers.SerializerMethodField()
+
+    def get_like(self, news):
+        return news.like_set.filter(active=True).exists()
+    class Meta:
+        model = NewsSerializer.Meta.model
+        fields = NewsSerializer.Meta.fields + ['like']
 
 class UserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
@@ -142,6 +123,12 @@ class UserSerializer(serializers.ModelSerializer):
                 'write_only': True
             }
         }
+
+class CommentTourSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = CommentTour
+        fields = ['id', 'created_date', 'content', 'user', 'tour_id']
 
 
 

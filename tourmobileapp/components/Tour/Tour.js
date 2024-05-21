@@ -29,7 +29,7 @@ const Tour = ({route, navigation}) => {
                 else if (page > 1)
                     setTours(current => {return [...current, ...res.data.results]})
                 if (res.data.next===null)
-                    setPage(0);
+                    setPage(-5);
             } catch (ex) {
                 console.error(ex);
             } finally {
