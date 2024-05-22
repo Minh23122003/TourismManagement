@@ -11,7 +11,11 @@ export const endpoints = {
     'news-details': (newsId) => `/news/${newsId}/`,
     'login': '/o/token/',
     'current-user': '/user/current-user/',
-    'register': '/user/'
+    'register': '/user/',
+    'commentTour': (tourId) => `/tours/${tourId}/get-comments/`,
+    'commentNews': (newsId) => `/news/${newsId}/get-comments/`,
+    'addCommentTour': (tourId) => `/tours/${tourId}/comments/`,
+    'addCommentNews': (newsId) => `/news/${newsId}/comments/`
 }
 
 export const authApi = (token) => {

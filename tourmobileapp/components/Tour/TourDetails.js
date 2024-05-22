@@ -1,15 +1,21 @@
-import React from 'react';
-import { View, Text, ScrollView, ActivityIndicator, useWindowDimensions } from 'react-native';
-import APIs, { endpoints } from '../../configs/APIs';
+import React, { useContext } from 'react';
+import { View, Text, ScrollView, ActivityIndicator, useWindowDimensions, Image, TouchableOpacity } from 'react-native';
+import APIs, { authApi, endpoints } from '../../configs/APIs';
 import Style from './Style';
-import { Card } from 'react-native-paper';
+import { Card, List, TextInput } from 'react-native-paper';
 import RenderHTML from 'react-native-render-html';
 import moment from 'moment';
+import { MyUserContext } from '../../configs/Contexts'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import 'moment/locale/vi'
 
 const TourDetails = ({ route }) => {
     const tourId = route.params?.tourId;
     const [tour, setTour] = React.useState(null);
+    const [comment, setComment] = React.useState(null);
     const { width } = useWindowDimensions();
+    const [user] = React.useState(2)
+    const [content, setContent] = React.useState()
 
     const loadTour = async () => {
         try {
@@ -20,9 +26,33 @@ const TourDetails = ({ route }) => {
         }
     }
 
+    const loadComment = async () => {
+        try {
+            let res = await APIs.get(endpoints['commentTour'](tourId))
+            setComment(res.data.results)
+        } catch (ex) {
+            console.error(ex)
+        }
+    }
+
     React.useEffect(() => {
         loadTour();
     }, [tourId])
+
+    React.useEffect(() => {
+        loadComment();
+    }, [])
+
+    const addComment = async () => {
+        try {
+            let token = await AsyncStorage.getItem('access-token')
+            let res = await authApi(token).post(endpoints['addCommentTour'](tourId), {
+                'content': content
+            })
+        } catch (ex) {
+            console.error(ex)
+        }
+    }
 
     return (
         <View style={[Style.container, Style.margin]}>
@@ -42,6 +72,26 @@ const TourDetails = ({ route }) => {
                             </View>                       
                         </View> )}
                     </Card>
+                </>}
+
+                <Text style={[Style.nameTour, Style.margin]}>Binh luan</Text>
+                {user===null?<ActivityIndicator/>:<>
+                    <View style={[Style.row,{alignItems:"center", justifyContent:"center"}]}>
+                            <TextInput value={content} onChangeText={t => setContent(t)} placeholder='Noi dung binh luan' style={Style.comment} />
+                            <TouchableOpacity onPress={addComment}>
+                                <Text style={Style.button}>Binh luan</Text>
+                            </TouchableOpacity>
+                    </View>
+                </>}
+                {comment===null?<ActivityIndicator/>:<>
+                    {comment.map(c => <View key={c.id} style={[Style.row, {margin:10}]}>
+                        <Image source={{uri: c.user.avatar}} style={[Style.avatar, Style.margin]} />
+                        <View>
+                            <Text style={Style.margin}>Nguoi binh luan: {c.user.first_name} {c.user.last_name}</Text>
+                            <Text style={Style.margin}>{c.content}</Text>
+                            <Text style={Style.margin}>{moment(c.created_date).fromNow()}</Text>
+                        </View>
+                    </View>)}
                 </>}
             </ScrollView>
         </View>
