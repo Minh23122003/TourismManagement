@@ -17,7 +17,7 @@ export default StyleSheet.create({
         margin:5
     }, container: {
         flex:1
-    }, nameTour:{
+    }, title:{
         fontSize:20,
         fontWeight:"bold",
         color:"blue",

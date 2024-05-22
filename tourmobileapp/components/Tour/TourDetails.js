@@ -35,8 +35,8 @@ const TourDetails = ({ route }) => {
                         </Card.Content>
                         <Text style={Style.margin}>Ngay bat dau: {moment(tour.start_date).format('DD-MM-YYYY')}</Text>
                         <Text style={Style.margin}>Ngay ket thuc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
-                        {tour.tour_image.map(t => <View>
-                            <Card.Cover style={Style.margin} key={t.id} source={{uri:t.image}} />
+                        {tour.tour_image.map(t => <View key={t.id}>
+                            <Card.Cover style={Style.margin} source={{uri:t.image}} />
                             <View style={{alignItems:"center"}} >
                                 <Text style={{fontStyle:"italic"}}>{t.name}</Text>
                             </View>                       

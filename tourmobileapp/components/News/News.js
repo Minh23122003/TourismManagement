@@ -14,9 +14,10 @@ const News = ({route, navigation}) => {
 
     const loadNews = async () => {
         if(page > 0) {
+            url = `${endpoints["news"]}?cate_id=${cateId}&&page=${page}`
             try {
                 setLoading(true)
-                let res = await APIs.get(endpoints['news'])
+                let res = await APIs.get(url)
                 if (page===1)
                     setNews(res.data.results)
                 else if ( page > 1)
@@ -32,9 +33,8 @@ const News = ({route, navigation}) => {
     }
 
     const loadCategories = async () => {
-        let url = `${endpoints["news"]}?cate_id=${cateId}`
         try {
-            let res = await APIs.get(url)
+            let res = await APIs.get(endpoints['cateNews'])
             setCategories(res.data)
         } catch (ex) {
             console.error(ex)
@@ -43,7 +43,7 @@ const News = ({route, navigation}) => {
 
     React.useEffect(() => {
         loadNews()
-    }, [cateId])
+    }, [cateId, page])
 
     React.useEffect(() => {
         loadCategories()
