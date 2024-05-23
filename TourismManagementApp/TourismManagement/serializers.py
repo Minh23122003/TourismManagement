@@ -61,13 +61,6 @@ class TourCategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-
-class CommentNewsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CommentNews
-        fields = '__all__'
-
-
 class NewsImageSerializer(ItemSerializer):
     class Meta:
         model = NewsImage
@@ -128,7 +121,14 @@ class CommentTourSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = CommentTour
-        fields = ['id', 'created_date', 'content', 'user', 'tour_id']
+        fields = ['id', 'updated_date', 'content', 'user', 'tour_id']
+
+
+class CommentNewsSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = CommentNews
+        fields = ['id', 'updated_date', 'content', 'user', 'news_id']
 
 
 

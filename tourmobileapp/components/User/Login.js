@@ -51,7 +51,7 @@ const Login = () => {
                     'type': "login",
                     'payload': user.data
                 })
-                nav.navigate('Tour');
+                nav.goBack();
             }, 100)
         } catch (ex) {
             console.error(ex)

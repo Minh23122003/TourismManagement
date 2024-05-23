@@ -25,5 +25,19 @@ export default StyleSheet.create({
     }, nameImage: {
         fontStyle:"italic",
         alignItems:"center"
+    }, avatar: {
+        width:60,
+        height:60,
+        borderRadius:10
+    }, comment: {
+        width: 300,
+        backgroundColor: "lightgray",
+        padding: 5
+    }, button: {
+        textAlign: "center",
+        backgroundColor: "darkblue",
+        color: "white",
+        padding: 20,
+        marginLeft:5
     }
 })

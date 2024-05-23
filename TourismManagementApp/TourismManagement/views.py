@@ -49,7 +49,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
 
     @action(methods=['get'], url_path='get-comments', detail=True)
     def get_comments(self, request, pk):
-        comments = self.get_object().commenttour_set.select_related('user').order_by('id')
+        comments = self.get_object().commenttour_set.select_related('user').order_by('-updated_date')
 
         paginator = paginators.CommentPaginator()
         page = paginator.paginate_queryset(comments, request)
