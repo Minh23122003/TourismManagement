@@ -21,7 +21,7 @@ class DestinationSerializer(serializers.ModelSerializer):
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
-        fields = '__all__'
+        fields = ['stars']
 
 
 class TourSerializer(serializers.ModelSerializer):
@@ -85,14 +85,11 @@ class NewsCategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class NewsLike(NewsSerializer):
-    like = serializers.SerializerMethodField()
-
-    def get_like(self, news):
-        return news.like_set.filter(active=True).exists()
+class LikeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = NewsSerializer.Meta.model
-        fields = NewsSerializer.Meta.fields + ['like']
+        model = Like
+        fields = ['active']
+
 
 class UserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
@@ -129,6 +126,12 @@ class CommentNewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommentNews
         fields = ['id', 'updated_date', 'content', 'user', 'news_id']
+
+
+
+
+
+
 
 
 

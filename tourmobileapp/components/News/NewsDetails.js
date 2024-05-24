@@ -2,7 +2,7 @@ import React from "react"
 import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from "react-native"
 import APIs, { authApi, endpoints } from "../../configs/APIs"
 import Style from "./Style"
-import { Card, TextInput } from "react-native-paper"
+import { Card, Chip, TextInput } from "react-native-paper"
 import RenderHTML from "react-native-render-html"
 import { isCloseToBottom } from "../Utils/Utils"
 import moment from 'moment';
@@ -19,6 +19,7 @@ const NewsDetails = ({ route }) => {
     const [content, setContent] = React.useState()
     const [page,setPage] = React.useState(1)
     const [loading, setLoading] = React.useState(false)
+    const [like, setLike] = React.useState(false)
 
     const loadNews = async () => {
         try {
@@ -60,14 +61,34 @@ const NewsDetails = ({ route }) => {
     const addComment = async () => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
-            let token = "32ps1bRS9FPvDc8BLbk9fm6W86OY6x"
+            let token = "0vJz1tP9JVaA77cTpil3lQs6qhkj1V"
             let res = await authApi(token).post(endpoints['addCommentNews'](newsId), {
                 'content': content
             })
         } catch (ex) {
             console.error(ex)
-        } finally {
-            loadComment()
+        }
+    }
+
+    const addLike = async () => {
+        try {
+            // let token = await AsyncStorage.getItem('access-token')
+            let token = "0vJz1tP9JVaA77cTpil3lQs6qhkj1V"
+            let res = await authApi(token).post(endpoints['addLike'](newsId))
+            setLike(res.data.active)
+        } catch (ex) {
+            console.error(ex)
+        }
+    }
+
+    const getLike = async () => {
+        try {
+            // let token = await AsyncStorage.getItem('access-token')
+            let token = "0vJz1tP9JVaA77cTpil3lQs6qhkj1V"
+            let res = await authApi(token).get(endpoints['like'](newsId))
+            setLike(res.data.active)
+        } catch (ex) {
+            console.error(ex)
         }
     }
 
@@ -80,12 +101,12 @@ const NewsDetails = ({ route }) => {
     return (
             <ScrollView style={[Style.margin, Style.container]}>
                 {news===null?<ActivityIndicator/>:<>
-                    <Card key={news.id}>
+                    <Card key={news.id} style={{flexWrap:"wrap"}}>
                         <Card.Title titleStyle={Style.title} title={news.title} />
                         <Card.Content>
                             <RenderHTML contentWidth={width} source={{html: news.content}} />
                         </Card.Content>
-                        {news.news_image.map(n => <View key={n.id}>
+                        {news.news_image.map(n => <View key={n.id} style={Style.margin}>
                             <Card.Cover style={Style.margin} source={{uri:n.image}} />
                             <View style={{alignItems:"center"}} >
                                 <Text style={{fontStyle:"italic"}}>{n.name}</Text>
@@ -93,6 +114,8 @@ const NewsDetails = ({ route }) => {
                         </View> )}
                     </Card>
                 </>}
+
+                <Chip onPress={() => addLike()} mode={like===false?"outlined":"flat"} style={[Style.margin, {width:100}]} icon="home">Tất cả</Chip>
 
                 <Text style={[Style.text, Style.margin]}>Binh luan</Text>
                 {user===null?<ActivityIndicator/>:<>

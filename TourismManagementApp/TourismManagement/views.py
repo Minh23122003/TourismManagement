@@ -13,7 +13,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
     pagination_class = paginators.TourPaginator
 
     def get_permissions(self):
-        if self.action in ['rating', 'add_comment']:
+        if self.action in ['add_rating', 'get_rating', 'add_comment']:
             return [permissions.IsAuthenticated()]
         return [permissions.AllowAny()]
 
@@ -59,9 +59,22 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
 
         return Response(serializers.CommentTourSerializer(comments, many=True).data)
 
+    @action(methods=['post'], url_path='comments', detail=True)
+    def add_comment(self, request, pk):
+        c = self.get_object().commenttour_set.create(content=request.data.get('content'), user=request.user)
 
-    @action(methods=['post'], url_path='rating', detail=True)
-    def rating(self, request, pk):
+        return Response(serializers.CommentTourSerializer(c).data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['get'], url_path='get-rating', detail=True)
+    def get_rating(self, request, pk):
+        rating = Rating.objects.get(tour=self.get_object(), user=request.user)
+
+        return Response(serializers.RatingSerializer(rating).data)
+
+
+
+    @action(methods=['post'], url_path='ratings', detail=True)
+    def add_rating(self, request, pk):
         rating, created = Rating.objects.get_or_create(tour=self.get_object(), user=request.user)
 
         if not created:
@@ -69,13 +82,6 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
             rating.save()
 
         return Response(serializers.TourRating(self.get_object()).data)
-
-
-    @action(methods=['post'], url_path='comments', detail=True)
-    def add_comment(self, request, pk):
-        c = self.get_object().commenttour_set.create(content=request.data.get('content'), user=request.user)
-
-        return Response(serializers.CommentTourSerializer(c).data, status=status.HTTP_201_CREATED)
 
 
 class TourCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
@@ -103,7 +109,7 @@ class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
         return queries
 
     def get_permissions(self):
-        if self.action in ['like', 'add_comment']:
+        if self.action in ['add_like', 'get_like', 'add_comment']:
             return [permissions.IsAuthenticated()]
         return [permissions.AllowAny()]
 
@@ -125,21 +131,29 @@ class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
 
         return Response(serializers.CommentNewsSerializer(comments, many=True).data)
 
-    @action(methods=['post'], url_path='like', detail=True)
-    def rating(self, request, pk):
+    @action(methods=['post'], url_path='comments', detail=True)
+    def add_comment(self, request, pk):
+        c = self.get_object().commentnews_set.create(content=request.data.get('content'), user=request.user)
+
+        return Response(serializers.CommentNewsSerializer(c).data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['get'], url_path='get-like', detail=True)
+    def get_like(self, request, pk):
+        like = Like.objects.get(user=request.user, news=self.get_object())
+
+        return Response(serializers.LikeSerializer(like).data)
+
+    @action(methods=['post'], url_path='likes', detail=True)
+    def add_like(self, request, pk):
         like, created = Like.objects.get_or_create(news=self.get_object(), user=request.user)
 
         if not created:
             like.active = not like.active
             like.save()
 
-        return Response(serializers.NewsLike(self.get_object()).data)
+        return Response(serializers.LikeSerializer(like).data)
 
-    @action(methods=['post'], url_path='comments', detail=True)
-    def add_comment(self, request, pk):
-        c = self.get_object().commentnews_set.create(content=request.data.get('content'), user=request.user)
 
-        return Response(serializers.CommentNewsSerializer(c).data, status=status.HTTP_201_CREATED)
 
 class NewsCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
     queryset = NewsCategory.objects.filter(active=True)
