@@ -17,7 +17,9 @@ export const endpoints = {
     'addCommentTour': (tourId) => `/tours/${tourId}/comments/`,
     'addCommentNews': (newsId) => `/news/${newsId}/comments/`,
     'addLike': (newsId) => `/news/${newsId}/likes/`,
-    'like': (newsId) => `/news/${newsId}/get-like/`
+    'like': (newsId) => `/news/${newsId}/get-like/`,
+    'addRating': (tourId) => `/tours/${tourId}/ratings/`,
+    'rating': (tourId) => `/tours/${tourId}/get-rating/`
 }
 
 export const authApi = (token) => {

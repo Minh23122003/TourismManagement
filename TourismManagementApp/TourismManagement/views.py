@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import *
 from datetime import datetime
+from django.http import JsonResponse
 
 
 class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
@@ -68,8 +69,9 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
     @action(methods=['get'], url_path='get-rating', detail=True)
     def get_rating(self, request, pk):
         rating = Rating.objects.get(tour=self.get_object(), user=request.user)
-
-        return Response(serializers.RatingSerializer(rating).data)
+        if rating:
+            return Response(serializers.RatingSerializer(rating).data)
+        return JsonResponse({'stars': 0})
 
 
 
@@ -81,7 +83,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
             rating.stars = request.data.get('stars')
             rating.save()
 
-        return Response(serializers.TourRating(self.get_object()).data)
+        return Response(serializers.RatingSerializer(rating).data)
 
 
 class TourCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
@@ -140,8 +142,9 @@ class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
     @action(methods=['get'], url_path='get-like', detail=True)
     def get_like(self, request, pk):
         like = Like.objects.get(user=request.user, news=self.get_object())
-
-        return Response(serializers.LikeSerializer(like).data)
+        if like:
+            return Response(serializers.LikeSerializer(like).data)
+        return JsonResponse({"active": False})
 
     @action(methods=['post'], url_path='likes', detail=True)
     def add_like(self, request, pk):

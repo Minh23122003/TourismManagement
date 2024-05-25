@@ -9,6 +9,7 @@ import { MyUserContext } from '../../configs/Contexts'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'moment/locale/vi'
 import { isCloseToBottom } from '../Utils/Utils';
+import { Rating, AirbnbRating } from "react-native-ratings"
 
 const TourDetails = ({ route, navigation }) => {
     const tourId = route.params?.tourId;
@@ -19,6 +20,7 @@ const TourDetails = ({ route, navigation }) => {
     const [content, setContent] = React.useState()
     const [page,setPage] = React.useState(1)
     const [loading, setLoading] = React.useState(false)
+    const [stars, setStars] = React.useState(0)
 
     const loadTour = async () => {
         try {
@@ -49,6 +51,17 @@ const TourDetails = ({ route, navigation }) => {
         }
     }
 
+    const getRating = async () => {
+        try {
+            // let token = await AsyncStorage.getItem('access-token')
+            let token = "9iBzPjjkRz5WJ2tRiik01Ww1a8h2QG"
+            let res = await authApi(token).get(endpoints['rating'](tourId))
+            setStars(res.data.stars)
+        } catch (ex) {
+            console.error(ex)
+        }
+    }
+
     React.useEffect(() => {
         loadTour();
     }, [tourId])
@@ -56,6 +69,10 @@ const TourDetails = ({ route, navigation }) => {
     React.useEffect(() => {
         loadComment();
     }, [page])
+
+    React.useEffect(() => {
+        getRating();
+    }, [])
 
     const addComment = async () => {
         try {
@@ -68,6 +85,19 @@ const TourDetails = ({ route, navigation }) => {
             console.error(ex)
         } finally {
             loadComment()
+        }
+    }
+
+    const addRating = async (number) => {
+        try {
+            // let token = await AsyncStorage.getItem('access-token')
+            let token = "9iBzPjjkRz5WJ2tRiik01Ww1a8h2QG"
+            let res = await authApi(token).post(endpoints['addRating'](tourId), {
+                'stars':number
+            })
+            setStars(number)
+        } catch (ex) {
+            console.error(ex)
         }
     }
 
@@ -86,13 +116,18 @@ const TourDetails = ({ route, navigation }) => {
                         <Card.Content>
                             <RenderHTML contentWidth={width} source={{html: tour.description}} />
                         </Card.Content>
-                        <Text style={Style.margin}>Ngay bat dau: {moment(tour.start_date).format('DD-MM-YYYY')}</Text>
-                        <Text style={Style.margin}>Ngay ket thuc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
-                        <Text style={Style.margin}>Gia nguoi lon: {tour.price_adult} VND</Text>
-                        <Text style={Style.margin}>Gia tre em: {tour.price_children} VND</Text>
-                        <Button style={[{backgroundColor:"lightblue", width:100}]} onPress={() => navigation.navigate('Booking', {tourId : tour.id})}>
-                            Dat ve {tour.id}
-                        </Button>
+                        <View style={Style.row}>
+                            <View>
+                                <Text style={Style.margin}>Ngay bat dau: {moment(tour.start_date).format('DD-MM-YYYY')}</Text>
+                                <Text style={Style.margin}>Ngay ket thuc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
+                                <Text style={Style.margin}>Gia nguoi lon: {tour.price_adult} VND</Text>
+                                <Text style={Style.margin}>Gia tre em: {tour.price_children} VND</Text>
+                            </View>
+                            <View style={{marginStart:40}}>
+                                <AirbnbRating count={5} reviews={['terrible', 'bad', 'ok', 'good', 'very good']} defaultRating={stars} size={20} onFinishRating={(number)=>addRating(number)}/>
+                            </View>
+                        </View>
+                        <Button style={[{backgroundColor:"lightblue", width:100}]} onPress={() => navigation.navigate('Booking', {tourId : tour.id})}>Dat ve</Button>
                         {tour.tour_image.map(t => <View key={t.id}>
                             <Card.Cover style={Style.margin} source={{uri:t.image}} />
                             <View style={{alignItems:"center"}} >

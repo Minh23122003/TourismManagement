@@ -50,6 +50,17 @@ const NewsDetails = ({ route }) => {
         }
     }
 
+    const getLike = async () => {
+        try {
+            // let token = await AsyncStorage.getItem('access-token')
+            let token = "9iBzPjjkRz5WJ2tRiik01Ww1a8h2QG"
+            let res = await authApi(token).get(endpoints['like'](newsId))
+            setLike(res.data.active)
+        } catch (ex) {
+            console.error(ex)
+        }
+    }
+
     React.useEffect(() => {
         loadNews();
     }, [newsId])
@@ -58,10 +69,14 @@ const NewsDetails = ({ route }) => {
         loadComment();
     }, [page])
 
+    React.useEffect(() => {
+        getLike();
+    }, [])
+
     const addComment = async () => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
-            let token = "0vJz1tP9JVaA77cTpil3lQs6qhkj1V"
+            let token = "9iBzPjjkRz5WJ2tRiik01Ww1a8h2QG"
             let res = await authApi(token).post(endpoints['addCommentNews'](newsId), {
                 'content': content
             })
@@ -73,19 +88,8 @@ const NewsDetails = ({ route }) => {
     const addLike = async () => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
-            let token = "0vJz1tP9JVaA77cTpil3lQs6qhkj1V"
+            let token = "9iBzPjjkRz5WJ2tRiik01Ww1a8h2QG"
             let res = await authApi(token).post(endpoints['addLike'](newsId))
-            setLike(res.data.active)
-        } catch (ex) {
-            console.error(ex)
-        }
-    }
-
-    const getLike = async () => {
-        try {
-            // let token = await AsyncStorage.getItem('access-token')
-            let token = "0vJz1tP9JVaA77cTpil3lQs6qhkj1V"
-            let res = await authApi(token).get(endpoints['like'](newsId))
             setLike(res.data.active)
         } catch (ex) {
             console.error(ex)
@@ -101,8 +105,8 @@ const NewsDetails = ({ route }) => {
     return (
             <ScrollView style={[Style.margin, Style.container]}>
                 {news===null?<ActivityIndicator/>:<>
-                    <Card key={news.id} style={{flexWrap:"wrap"}}>
-                        <Card.Title titleStyle={Style.title} title={news.title} />
+                    <Card key={news.id} style={{alignItems:"center"}}>
+                        <Card.Title titleStyle={[Style.title, {display:"flex", flexWrap:"wrap"}]} title={news.title} />
                         <Card.Content>
                             <RenderHTML contentWidth={width} source={{html: news.content}} />
                         </Card.Content>
@@ -115,7 +119,7 @@ const NewsDetails = ({ route }) => {
                     </Card>
                 </>}
 
-                <Chip onPress={() => addLike()} mode={like===false?"outlined":"flat"} style={[Style.margin, {width:100}]} icon="home">Tất cả</Chip>
+                <Chip onPress={() => addLike()} style={[Style.margin, {width:100, backgroundColor: like===true?"lightblue":"white"}]} icon="heart">Thich</Chip>
 
                 <Text style={[Style.text, Style.margin]}>Binh luan</Text>
                 {user===null?<ActivityIndicator/>:<>

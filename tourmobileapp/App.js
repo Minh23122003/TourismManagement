@@ -52,9 +52,9 @@ const Tab = createBottomTabNavigator()
 const MyTab = () => {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Home" component={TourStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="home" />}} />
-      <Tab.Screen name="Newss" component={NewsStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="home" />}} />
-      <Tab.Screen name="User" component={UserStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="home" />}} />
+      <Tab.Screen name="Home" component={TourStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="home" />, title:"Trang chu"}} />
+      <Tab.Screen name="Newss" component={NewsStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="newspaper" />, title:"Tin tuc"}} />
+      <Tab.Screen name="User" component={UserStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="account" />, title:'Dang nhap'}} />
     </Tab.Navigator>
   )
 }
