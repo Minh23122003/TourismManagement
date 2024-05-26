@@ -1,31 +1,30 @@
-import React, { useContext } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, useWindowDimensions, Image, TouchableOpacity, RefreshControl } from 'react-native';
-import APIs, { authApi, endpoints } from '../../configs/APIs';
-import Style from './Style';
-import { Button, Card, List, TextInput } from 'react-native-paper';
-import RenderHTML from 'react-native-render-html';
+import React from "react"
+import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from "react-native"
+import APIs, { authApi, endpoints } from "../../configs/APIs"
+import Style from "./Style"
+import { Card, Chip, TextInput } from "react-native-paper"
+import RenderHTML from "react-native-render-html"
+import { isCloseToBottom } from "../Utils/Utils"
 import moment from 'moment';
 import { MyUserContext } from '../../configs/Contexts'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'moment/locale/vi'
-import { isCloseToBottom } from '../Utils/Utils';
-import { Rating, AirbnbRating } from "react-native-ratings"
 
-const TourDetails = ({ route, navigation }) => {
-    const tourId = route.params?.tourId;
-    const [tour, setTour] = React.useState(null);
-    const [comment, setComment] = React.useState(null);
+const NewsDetails = ({ route }) => {
+    const newsId = route.params?.newsId
+    const [news, setNews] = React.useState(null)
     const { width } = useWindowDimensions();
+    const [comment, setComment] = React.useState(null);
     const [user] = React.useState(2)
     const [content, setContent] = React.useState()
     const [page,setPage] = React.useState(1)
     const [loading, setLoading] = React.useState(false)
-    const [stars, setStars] = React.useState(0)
+    const [like, setLike] = React.useState(false)
 
-    const loadTour = async () => {
+    const loadNews = async () => {
         try {
-            let res = await APIs.get(endpoints['tour-details'](tourId))
-            setTour(res.data)
+            let res = await APIs.get(endpoints['news-details'](newsId))
+            setNews(res.data)
         } catch (ex) {
             console.error(ex);
         }
@@ -33,7 +32,7 @@ const TourDetails = ({ route, navigation }) => {
 
     const loadComment = async () => {
         if (page > 0){
-            let url = `${endpoints['commentTour'](tourId)}?page=${page}`
+            let url = `${endpoints['commentNews'](newsId)}?page=${page}`
             try {
                 setLoading(true)
                 let res = await APIs.get(url)
@@ -51,50 +50,47 @@ const TourDetails = ({ route, navigation }) => {
         }
     }
 
-    const getRating = async () => {
+    const getLike = async () => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
             let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
-            let res = await authApi(token).get(endpoints['rating'](tourId))
-            setStars(res.data.stars)
+            let res = await authApi(token).get(endpoints['like'](newsId))
+            setLike(res.data.active)
         } catch (ex) {
             console.error(ex)
         }
     }
 
     React.useEffect(() => {
-        loadTour();
-    }, [tourId])
+        loadNews();
+    }, [newsId])
 
     React.useEffect(() => {
         loadComment();
     }, [page])
 
     React.useEffect(() => {
-        getRating();
+        getLike();
     }, [])
 
     const addComment = async () => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
             let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
-            let res = await authApi(token).post(endpoints['addCommentTour'](tourId), {
+            let res = await authApi(token).post(endpoints['addCommentNews'](newsId), {
                 'content': content
             })
         } catch (ex) {
             console.error(ex)
-        } finally {
-            loadComment()
         }
     }
 
-    const addRating = async (number) => {
+    const addLike = async () => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
             let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
-            let res = await authApi(token).post(endpoints['addRating'](tourId), {
-                'stars':number
-            })
+            let res = await authApi(token).post(endpoints['addLike'](newsId))
+            setLike(res.data.active)
         } catch (ex) {
             console.error(ex)
         }
@@ -107,37 +103,25 @@ const TourDetails = ({ route, navigation }) => {
     }
 
     return (
-            <ScrollView style={[Style.margin, Style.container]} onScroll={loadMore}>
-                {<RefreshControl onRefresh={() => {setPage(1), loadComment()}} />}
-                {tour===null?<ActivityIndicator/>:<>
-                    <Card key={tour.id}>
-                        <Card.Title titleStyle={Style.nameTour} title={tour.name} />
+            <ScrollView style={[Style.margin, Style.container]}>
+                {news===null?<ActivityIndicator/>:<>
+                    <Card key={news.id} style={{alignItems:"center"}}>
+                        <Card.Title titleStyle={[Style.title, {display:"flex", flexWrap:"wrap"}]} title={news.title} />
                         <Card.Content>
-                            <RenderHTML contentWidth={width} source={{html: tour.description}} />
+                            <RenderHTML contentWidth={width} source={{html: news.content}} />
                         </Card.Content>
-                        <View style={Style.row}>
-                            <View>
-                                <Text style={Style.margin}>Ngay bat dau: {moment(tour.start_date).format('DD-MM-YYYY')}</Text>
-                                <Text style={Style.margin}>Ngay ket thuc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
-                                <Text style={Style.margin}>Gia nguoi lon: {tour.price_adult} VND</Text>
-                                <Text style={Style.margin}>Gia tre em: {tour.price_children} VND</Text>
-                                <Text style={Style.margin}>So ve con lai: {tour.remain_ticket}</Text>
-                            </View>
-                            <View style={{marginStart:40}}>
-                                <AirbnbRating count={5} reviews={['terrible', 'bad', 'ok', 'good', 'very good']} defaultRating={stars} size={20} onFinishRating={(number)=>{setStars(number); addRating(number)}}/>
-                            </View>
-                        </View>
-                        <Button style={[{backgroundColor:"lightblue", width:100}]} onPress={() => navigation.navigate('Booking', {tour : tour})}>Dat ve</Button>
-                        {tour.tour_image.map(t => <View key={t.id}>
-                            <Card.Cover style={Style.margin} source={{uri:t.image}} />
+                        {news.news_image.map(n => <View key={n.id} style={Style.margin}>
+                            <Card.Cover style={Style.margin} source={{uri:n.image}} />
                             <View style={{alignItems:"center"}} >
-                                <Text style={{fontStyle:"italic"}}>{t.name}</Text>
+                                <Text style={{fontStyle:"italic"}}>{n.name}</Text>
                             </View>                       
                         </View> )}
                     </Card>
                 </>}
 
-                <Text style={[Style.nameTour, Style.margin]}>Binh luan</Text>
+                <Chip onPress={() => addLike()} style={[Style.margin, {width:100, backgroundColor: like===true?"lightblue":"white"}]} icon="heart">Thich</Chip>
+
+                <Text style={[Style.text, Style.margin]}>Binh luan</Text>
                 {user===null?<ActivityIndicator/>:<>
                     <View style={[Style.row,{alignItems:"center", justifyContent:"center"}]}>
                             <TextInput value={content} onChangeText={t => setContent(t)} placeholder='Noi dung binh luan' style={Style.comment} />
@@ -146,6 +130,7 @@ const TourDetails = ({ route, navigation }) => {
                             </TouchableOpacity>
                     </View>
                 </>}
+
                 {comment===null?<ActivityIndicator/>:<>
                     {comment.map(c => <View key={c.id} style={[Style.row, {margin:10, backgroundColor:"lightblue"}]}>
                         <Image source={{uri: c.user.avatar}} style={[Style.avatar, Style.margin]} />
@@ -161,4 +146,4 @@ const TourDetails = ({ route, navigation }) => {
     )
 }
 
-export default TourDetails
+export default NewsDetails;

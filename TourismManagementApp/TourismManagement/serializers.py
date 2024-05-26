@@ -12,28 +12,6 @@ class ItemSerializer(serializers.ModelSerializer):
         return rep
 
 
-class AdminSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Admin
-        exclude = ['user']
-
-
-class StaffSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Staff
-        exclude = ['user']
-
-class CustomerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Customer
-        exclude = ['user']
-
-class ReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Report
-        fields = '__all__'
-
-
 class DestinationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Destination
@@ -43,13 +21,7 @@ class DestinationSerializer(serializers.ModelSerializer):
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
-        fields = '__all__'
-
-
-class CommentTourSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CommentTour
-        fields = '__all__'
+        fields = ['stars']
 
 
 class TourSerializer(serializers.ModelSerializer):
@@ -67,9 +39,32 @@ class TourDetailsSerializer(TourSerializer):
     tour_image = TourImageSerializer(many=True)
     destination = DestinationSerializer(many=True)
 
+    remain_ticket = serializers.SerializerMethodField()
+
+    def get_remain_ticket(self, tour):
+        book = Booking.objects.filter(tour_id=tour.id)
+        if book:
+            remain = tour.quantity_ticket
+            for b in book:
+                remain = remain - b.quantity_ticket_adult - b.quantity_ticket_children
+            return remain
+        return tour.quantity_ticket
+
+
     class Meta:
         model = TourSerializer.Meta.model
-        fields = TourSerializer.Meta.fields + ['tour_image'] + ['destination']
+        fields = TourSerializer.Meta.fields + ['tour_image'] + ['destination'] + ['remain_ticket']
+
+
+class TourRating(TourDetailsSerializer):
+    rating = serializers.SerializerMethodField()
+
+    def get_rating(self, tour):
+        return tour.rating_set.filter(active=True).exists()
+
+    class Meta:
+        model = TourDetailsSerializer.Meta.model
+        fields = TourDetailsSerializer.Meta.fields + ['rating']
 
 
 class TourCategorySerializer(serializers.ModelSerializer):
@@ -78,46 +73,34 @@ class TourCategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class BookingSerializer(serializers.ModelSerializer):
+class NewsImageSerializer(ItemSerializer):
     class Meta:
-        model = Booking
-        fields = '__all__'
+        model = NewsImage
+        fields = ['id', 'name', 'image']
 
-
-class BillSerializer(serializers.ModelSerializer):
+class NewsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Bill
-        fields = '__all__'
+        model = News
+        fields = ['id', 'title', 'content', 'news_category_id']
 
 
-class CommentNewsSerializer(serializers.ModelSerializer):
+class NewsDetailsSerializer(NewsSerializer):
+    news_image = NewsImageSerializer(many=True)
+
     class Meta:
-        model = CommentNews
-        fields = '__all__'
+        model = NewsSerializer.Meta.model
+        fields = NewsSerializer.Meta.fields + ['news_image']
+
+class NewsCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsCategory
+        fields = ['id', 'name']
 
 
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
-        fields = '__all__'
-
-
-class NewsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = News
-        fields = '__all__'
-
-
-class NewsImageSerializer(ItemSerializer):
-    class Meta:
-        model = NewsImage
-        fields = '__all__'
-
-
-class NewsCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = NewsCategory
-        fields = '__all__'
+        fields = ['active']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -136,12 +119,42 @@ class UserSerializer(serializers.ModelSerializer):
         return user
     class Meta:
         model = User
-        fields = ['id', 'username', 'password']
+        fields = ['id', 'username', 'password', 'first_name', 'last_name']
         extra_kwargs = {
             'password': {
                 'write_only': True
             }
         }
+
+class CommentTourSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = CommentTour
+        fields = ['id', 'updated_date', 'content', 'user', 'tour_id']
+
+
+class CommentNewsSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = CommentNews
+        fields = ['id', 'updated_date', 'content', 'user', 'news_id']
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    total = serializers.SerializerMethodField()
+
+    def get_total(self, booking):
+        tour = Tour.objects.get(id=booking.tour_id)
+        return int(tour.price_adult) * int(booking.quantity_ticket_adult) + int(tour.price_children) * int(booking.quantity_ticket_children)
+    class Meta:
+        model = Booking
+        fields = ['id', 'tour_id', 'user_id', 'quantity_ticket_adult', 'quantity_ticket_children'] + ['total']
+
+
+
+
+
+
 
 
 

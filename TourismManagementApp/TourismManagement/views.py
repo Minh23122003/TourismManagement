@@ -4,43 +4,25 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import *
 from datetime import datetime
+from django.http import JsonResponse
 
 
-class StaffViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.RetrieveAPIView, generics.UpdateAPIView):
-    queryset = Staff.objects.filter(active=True)
-    serializer_class = serializers.StaffSerializer
-    permission_classes = [permissions.IsAdminUser]
-
-class CustomerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView, generics.ListAPIView):
-
-    serializer_class = serializers.CustomerSerializer
-    queryset = Customer.objects.filter(active=True)
-
-    #
-    #
-    # POST == 'Allow Any vì user có thể là guest
-    def get_permissions(self):
-        if self.request.method == 'POST' or self.request.method=='GET':
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
-
-class AdminViewSet(viewsets.ViewSet):
-    queryset = Admin.objects.filter(active=True)
-    serializer_class = serializers.AdminSerializer
-    permission_classes = [permissions.IsAdminUser()]
-
-
-class ReportViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPIView):
-    serializer_class = serializers.ReportSerializer
-    queryset = Report.objects.filter(active=True)
-    permission_classes = [permissions.IsAdminUser()]
-
-
-class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView):
+class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
 
     queryset = Tour.objects.filter(active=True)
     serializer_class = serializers.TourDetailsSerializer
     pagination_class = paginators.TourPaginator
+
+    def get_permissions(self):
+        if self.action in ['add_rating', 'get_rating', 'add_comment', 'add_booking']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
+
+    def get_serializer_class(self):
+        if self.request.user.is_authenticated:
+            return serializers.TourRating
+        return self.serializer_class
 
     def get_queryset(self):
         queries = self.queryset
@@ -61,57 +43,57 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
             destination = Destination.objects.filter(location=destination)
             if destination:
                 queries = queries.filter(destination__in=destination).distinct()
-            id = self.request.query_params.get('id')
-            if id:
-                queries = queries.filter(id=int(id))
             cate_id = self.request.query_params.get('cate_id')
             if cate_id:
                 queries = queries.filter(tour_category_id=cate_id)
         return queries
 
-    def partial_update(self, request, pk=None):
-        tour_object = self.get_object()
-        serializer = self.get_serializer(tour_object, data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    @action(methods=['get'], url_path='get-comments', detail=True)
+    def get_comments(self, request, pk):
+        comments = self.get_object().commenttour_set.select_related('user').order_by('-updated_date')
 
+        paginator = paginators.CommentPaginator()
+        page = paginator.paginate_queryset(comments, request)
+        if page is not None:
+            serializer = serializers.CommentTourSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
 
-    @action(methods=['get'], detail=True,
-            name='Get ratings per tour',
-            url_path='get-ratings',
-            )
+        return Response(serializers.CommentTourSerializer(comments, many=True).data)
+
+    @action(methods=['post'], url_path='comments', detail=True)
+    def add_comment(self, request, pk):
+        c = self.get_object().commenttour_set.create(content=request.data.get('content'), user=request.user)
+
+        return Response(serializers.CommentTourSerializer(c).data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['get'], url_path='get-rating', detail=True)
     def get_rating(self, request, pk):
         try:
-            rating = Rating.objects.filter(tour_id=pk).all()
+            rating = Rating.objects.get(tour=self.get_object(), user=request.user)
+            return Response(serializers.RatingSerializer(rating).data)
+        except:
+            return JsonResponse({'stars': 0})
 
-            serializer = serializers.RatingSerializer(rating, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Rating.DoesNotExist as err:
-            return Response(data={'message': err}, status=status.HTTP_404_NOT_FOUND)
 
-    @action(methods=['post'], detail=True,
-            name='Post ratings per tour',
-            url_path='post-ratings',
-            )
-    def post_rating(self, request, pk):
-        try:
 
-            data = request.data
-            rating = Rating()
-            rating.customer = Customer.objects.filter(id=data.get("customer")).first()
-            rating.stars = data.get("stars")
-            rating.tour= self.get_object()
+    @action(methods=['post'], url_path='ratings', detail=True)
+    def add_rating(self, request, pk):
+        rating, created = Rating.objects.update_or_create(tour=self.get_object(), user=request.user, create_defaults={'stars':request.data.get('stars') })
+
+        if not created:
+            rating.stars = request.data.get('stars')
             rating.save()
-            serializer = serializers.RatingSerializer(rating, request.data)
-            if serializer.is_valid(raise_exception=True):
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Rating.DoesNotExist as err:
-            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializers.RatingSerializer(rating).data)
+
+    @action(methods=['post'], url_path='booking', detail=True)
+    def add_booking(self, request, pk):
+        book = Booking.objects.filter(tour_id=self.get_object().id)
+        remain = self.get_object().quantity_ticket
+        if book:
+            for b in book:
+                remain = remain - b.quantity_ticket_adult - b.quantity_ticket_children
+        if remain >= (int(request.data.get('quantity_ticket_adult')) + int(request.data.get('quantity_ticket_children'))):
+            booking, created = Booking.objects.update_or_create(user=request.user, tour=self.get_object(), create_defaults={'quantity_ticket_adult':request.data.get('quantity_ticket_adult'), 'quantity_ticket_children':request.data.get('quantity_ticket_children')})
 
 
     @action(methods=['patch'], detail=True,
@@ -193,291 +175,91 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
         except Rating.DoesNotExist as err:
             return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
 
+            if not created:
+                booking.quantity_ticket_adult = request.data.get('quantity_ticket_adult')
+                booking.quantity_ticket_children = request.data.get('quantity_ticket_children')
+                booking.save()
+            return Response(serializers.BookingSerializer(booking).data, status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({'content': 'Tong so ve phai nho hon hoac bang so ve con lai'}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 
 
-
-
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-
-        return [permissions.IsAdminUser()]
-
-
-class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView,generics.ListAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
-    queryset = TourImage.objects.filter(active=True).all()
-    serializer_class = serializers.TourImageSerializer
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-
-        return [permissions.IsAdminUser()]
-
-
-class TourCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
+class TourCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
     queryset = TourCategory.objects.filter(active=True)
     serializer_class = serializers.TourCategorySerializer
 
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-        return [permissions.IsAdminUser()]
 
-    @action(methods=['get'], url_path='tours', detail=False)
-    def tour(self, request, pk):
-        tours = self.get_object().tour_set.filter(active=True).all()
-        return Response(serializers.TourSerializer(tours, many=True, context={'request':request}).data, status.HTTP_200_OK)
-
-
-class DestinationViewSet(viewsets.ViewSet, generics.CreateAPIView,
-                         generics.ListAPIView, generics.UpdateAPIView):
-
-    queryset = Destination.objects.filter(active=True)
-    serializer_class = serializers.DestinationSerializer
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-        return [permissions.IsAdminUser()]
-
-
-class BookingViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView):
-
-    queryset = Booking.objects.filter(active=True)
-    serializer_class = serializers.BookingSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class BillViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView):
-
-    queryset = Bill.objects.filter(active=True)
-    serializer_class = serializers.BillSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class NewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.RetrieveAPIView, generics.UpdateAPIView):
+class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
 
     queryset = News.objects.filter(active=True)
-    serializer_class = serializers.NewsSerializer
+    serializer_class = serializers.NewsDetailsSerializer
     pagination_class = paginators.NewsPaginator
 
-    @action(methods=['get'], detail=True,
-            name='Get likes per tour',
-            url_path='get-likes',
-            )
+    def get_queryset(self):
+        queries = self.queryset
+        if self.action.__eq__('list'):
+            cate_id = self.request.query_params.get('cate_id')
+            if cate_id:
+                queries = queries.filter(news_category_id=cate_id)
+        return queries
+
+    def get_permissions(self):
+        if self.action in ['add_like', 'get_like', 'add_comment']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
+
+    def get_serializer_class(self):
+        if self.request.user.is_authenticated:
+            return serializers.TourRating
+        return self.serializer_class
+
+    @action(methods=['get'], url_path='get-comments', detail=True)
+    def get_comments(self, request, pk):
+        comments = self.get_object().commentnews_set.select_related('user').order_by('id')
+
+        paginator = paginators.CommentPaginator()
+        page = paginator.paginate_queryset(comments, request)
+        if page is not None:
+            serializer = serializers.CommentNewsSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+        return Response(serializers.CommentNewsSerializer(comments, many=True).data)
+
+    @action(methods=['post'], url_path='comments', detail=True)
+    def add_comment(self, request, pk):
+        c = self.get_object().commentnews_set.create(content=request.data.get('content'), user=request.user)
+
+        return Response(serializers.CommentNewsSerializer(c).data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['get'], url_path='get-like', detail=True)
     def get_like(self, request, pk):
         try:
-            like = Like.objects.filter(news_id=pk).all()
+            like = Like.objects.get(user=request.user, news=self.get_object())
+            return Response(serializers.LikeSerializer(like).data)
+        except:
+            return JsonResponse({"active": False})
 
-            serializer = serializers.LikeSerializer(like, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Rating.DoesNotExist as err:
-            return Response(data={'message': err}, status=status.HTTP_404_NOT_FOUND)
+    @action(methods=['post'], url_path='likes', detail=True)
+    def add_like(self, request, pk):
+        like, created = Like.objects.get_or_create(news=self.get_object(), user=request.user)
 
-    @action(methods=['post'], detail=True,
-            name='Post likes per tour',
-            url_path='post-likes',
-            )
-    def post_like(self, request, pk):
-        try:
-            data = request.data
-            like = Like()
-            like.customer = Customer.objects.filter(id=data.get("customer")).first()
-            like.news = self.get_object()
+        if not created:
+            like.active = not like.active
             like.save()
-            serializer = serializers.LikeSerializer(like, request.data)
-            if serializer.is_valid(raise_exception=True):
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Rating.DoesNotExist as err:
-            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
 
-    @action(methods=['patch'], detail=True,
-            name='Update likes per tour',
-            url_path='update-likes/(?P<id>[^/.]+)',
-            )
-    def partial_update_like(self, request, pk=None, id=None):
-        try:
-            like = Like.objects.get(id=int(id))
-            serializer = serializers.LikeSerializer(like, data=request.data, partial=True)
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Rating.DoesNotExist as err:
-            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
-
-  ###### ###### ##  ## ######
-    ##   ##  ## ##  ## ######
-    ##   ###### ###### ## ###
-    @action(methods=['get'], detail=True,
-            name='Get comment tour per tour',
-            url_path='get-comments',
-            )
-    def get_comment_news(self, request, pk):
-        try:
-            comment = CommentNews.objects.filter(news_id=pk).all()
-
-            serializer = serializers.CommentNewsSerializer(comment, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Rating.DoesNotExist as err:
-            return Response(data={'message': err}, status=status.HTTP_404_NOT_FOUND)
-
-    @action(methods=['post'], detail=True,
-            name='Post comment per tour',
-            url_path='post-comments',
-            )
-    def post_comment_tour(self, request, pk):
-        try:
-
-            data = request.data
-            comment = CommentNews()
-            comment.customer = Customer.objects.filter(id=data.get("customer")).first()
-            comment.content = data.get("content")
-            comment.news = self.get_object()
-            comment.save()
-            serializer = serializers.CommentNewsSerializer(comment, request.data)
-            if serializer.is_valid(raise_exception=True):
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Rating.DoesNotExist as err:
-            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
-
-    @action(methods=['patch'], detail=True,
-            name='Update ratings per tour',
-            url_path='update-comments/(?P<id>[^/.]+)',
-            )
-    def partial_update_comment_tour(self, request, pk=None, id=None):
-        try:
-            comment = CommentNews.objects.get(id=int(id))
-            serializer = serializers.CommentNewsSerializer(comment, data=request.data, partial=True)
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Rating.DoesNotExist as err:
-            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
-
-    @action(methods=['delete'], detail=True,
-            name='Delete ratings per tour',
-            url_path='delete-comments/(?P<id>[^/.]+)',
-            )
-    def delete_comment_tour(self, request, pk=None, id=None):
-        try:
-            comment = CommentNews.objects.filter(id=int(id)).first()
-            comment.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Rating.DoesNotExist as err:
-            return Response(data={"message": err}, status=status.HTTP_404_NOT_FOUND)
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+        return Response(serializers.LikeSerializer(like).data)
 
 
-class NewsImageViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
-    queryset = NewsImage.objects.filter(active=True)
-    serializer_class = serializers.NewsImageSerializer
 
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-
-        return [permissions.IsAuthenticated()]
-
-# Không có retrieve vì news category, tour category chỉ tỏng để thống kê
-class NewsCategoryViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
+class NewsCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
     queryset = NewsCategory.objects.filter(active=True)
     serializer_class = serializers.NewsCategorySerializer
 
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
 
-        return [permissions.IsAuthenticated()]
-
-
-# rating  cũng tương tự như tour category, news category
-class RatingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
-    serializer_class = serializers.RatingSerializer
-    queryset = Rating.objects.filter(active=True)
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-
-        return [permissions.IsAuthenticated()]
-
-
-
-# like cũng tương tự như tour category, news category
-class LikeViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
-    serializer_class = serializers.LikeSerializer
-    queryset = Like.objects.filter(active=True)
-
-    def partial_update(self, request, pk=None):
-        like_object = self.get_object()
-        serializer = self.get_serializer(like_object, data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-
-        return [permissions.IsAuthenticated()]
-
-
-class CommentTourViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
-    queryset = CommentTour.objects.filter(active=True)
-    serializer_class = serializers.CommentTourSerializer
-
-    def partial_update(self, request, pk=None):
-        comment_object = self.get_object()
-        serializer = self.get_serializer(comment_object, data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-
-        return [permissions.IsAuthenticated()]
-
-
-class CommentNewsViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
-    queryset = CommentNews.objects.filter(active=True)
-    serializer_class = serializers.CommentNewsSerializer
-
-    def partial_update(self, request, pk=None):
-        comment_object = self.get_object()
-        serializer = self.get_serializer(comment_object, data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-
-        return [permissions.IsAuthenticated()]
-
-
-class UserViewSet(viewsets.ViewSet, generics.ListAPIView):
+class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = User.objects.filter(is_active=True)
     serializer_class = serializers.UserSerializer
     parser_classes = [parsers.MultiPartParser]
@@ -486,3 +268,14 @@ class UserViewSet(viewsets.ViewSet, generics.ListAPIView):
         if self.action in ['get_current_user']:
             return [permissions.IsAuthenticated()]
         return [permissions.AllowAny()]
+
+    @action(methods=['get', 'put'], url_path='current-user', detail=False)
+    def get_current_user(self, request):
+        user = request.user
+        if request.method.__eq__('PUT'):
+            for k, v in request.data.items():
+                setattr(user, k, v)
+            user.save()
+
+        return Response(serializers.UserSerializer(user).data)
+

@@ -86,39 +86,39 @@ class Tour(BaseModel):
 
 
 class Booking(BaseModel):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE)
     quantity_ticket_adult = models.IntegerField()
     quantity_ticket_children = models.IntegerField()
 
     def __str__(self):
-        return f'{self.customer_id} - {self.tour_id}'
+        return f'{self.user_id} - {self.tour_id}'
 
 
 class Bill(BaseModel):
     total_price = models.IntegerField()
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.customer_id}'
+        return f'{self.user_id}'
 
 
 class Rating(BaseModel):
-    stars = models.IntegerField()
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    stars = models.FloatField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.customer_id} - {self.tour_id}'
+        return f'{self.user_id} - {self.tour_id}'
 
 
 class CommentTour(BaseModel):
     content = models.CharField(max_length=200)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.customer_id} - {self.tour_id}'
+        return f'{self.user_id} - {self.tour_id}'
 
 
 class NewsCategory(BaseModel):
@@ -148,23 +148,23 @@ class News(BaseModel):
 
 
 class Like(BaseModel):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     news = models.ForeignKey(News, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('customer', 'news')
+        unique_together = ('user', 'news')
 
     def __str__(self):
-        return f'{self.customer_id} - {self.news_id}'
+        return f'{self.user_id} - {self.news_id}'
 
 
 class CommentNews(BaseModel):
     content = models.CharField(max_length=200)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     news = models.ForeignKey(News, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.customer_id} - {self.news_id}'
+        return f'{self.user_id} - {self.news_id}'
 
 
 class Report(BaseModel):
@@ -172,7 +172,7 @@ class Report(BaseModel):
     revenue = models.IntegerField()
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    admin = models.ForeignKey(Admin, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.start_date)
