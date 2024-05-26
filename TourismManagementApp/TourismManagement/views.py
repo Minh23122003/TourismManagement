@@ -159,6 +159,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
             comment.save()
             serializer = serializers.CommentTourSerializer(comment, request.data)
             if serializer.is_valid(raise_exception=True):
+                serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
