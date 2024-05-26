@@ -14,7 +14,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
     pagination_class = paginators.TourPaginator
 
     def get_permissions(self):
-        if self.action in ['add_rating', 'get_rating', 'add_comment']:
+        if self.action in ['add_rating', 'get_rating', 'add_comment', 'add_booking']:
             return [permissions.IsAuthenticated()]
         return [permissions.AllowAny()]
 
@@ -68,32 +68,46 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
 
     @action(methods=['get'], url_path='get-rating', detail=True)
     def get_rating(self, request, pk):
-        rating = Rating.objects.get(tour=self.get_object(), user=request.user)
-        if rating:
+        try:
+            rating = Rating.objects.get(tour=self.get_object(), user=request.user)
             return Response(serializers.RatingSerializer(rating).data)
-        return JsonResponse({'stars': 0})
+        except:
+            return JsonResponse({'stars': 0})
 
 
 
     @action(methods=['post'], url_path='ratings', detail=True)
     def add_rating(self, request, pk):
-        rating, created = Rating.objects.get_or_create(tour=self.get_object(), user=request.user)
+        rating, created = Rating.objects.update_or_create(tour=self.get_object(), user=request.user, create_defaults={'stars':request.data.get('stars') })
 
         if not created:
             rating.stars = request.data.get('stars')
             rating.save()
-
         return Response(serializers.RatingSerializer(rating).data)
+
+    @action(methods=['post'], url_path='booking', detail=True)
+    def add_booking(self, request, pk):
+        book = Booking.objects.filter(tour_id=self.get_object().id)
+        remain = self.get_object().quantity_ticket
+        if book:
+            for b in book:
+                remain = remain - b.quantity_ticket_adult - b.quantity_ticket_children
+        if remain >= (int(request.data.get('quantity_ticket_adult')) + int(request.data.get('quantity_ticket_children'))):
+            booking, created = Booking.objects.update_or_create(user=request.user, tour=self.get_object(), create_defaults={'quantity_ticket_adult':request.data.get('quantity_ticket_adult'), 'quantity_ticket_children':request.data.get('quantity_ticket_children')})
+
+            if not created:
+                booking.quantity_ticket_adult = request.data.get('quantity_ticket_adult')
+                booking.quantity_ticket_children = request.data.get('quantity_ticket_children')
+                booking.save()
+            return Response(serializers.BookingSerializer(booking).data, status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({'content': 'Tong so ve phai nho hon hoac bang so ve con lai'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
 
 
 class TourCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
     queryset = TourCategory.objects.filter(active=True)
     serializer_class = serializers.TourCategorySerializer
-
-    @action(methods=['get'], url_path='tours', detail=True)
-    def tour(self, request, pk):
-        tours = self.get_object().tour_set.filter(active=True).all()
-        return Response(serializers.TourDetailsSerializer(tours, many=True, context={'request':request}).data, status.HTTP_200_OK)
 
 
 class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
@@ -141,10 +155,11 @@ class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
 
     @action(methods=['get'], url_path='get-like', detail=True)
     def get_like(self, request, pk):
-        like = Like.objects.get(user=request.user, news=self.get_object())
-        if like:
+        try:
+            like = Like.objects.get(user=request.user, news=self.get_object())
             return Response(serializers.LikeSerializer(like).data)
-        return JsonResponse({"active": False})
+        except:
+            return JsonResponse({"active": False})
 
     @action(methods=['post'], url_path='likes', detail=True)
     def add_like(self, request, pk):
@@ -162,11 +177,6 @@ class NewsCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retri
     queryset = NewsCategory.objects.filter(active=True)
     serializer_class = serializers.NewsCategorySerializer
 
-    @action(methods=['get'], url_path='news', detail=True)
-    def news(self, request, pk):
-        news = self.get_object().news_set.filter(active=True).all()
-        return Response(serializers.NewsDetailsSerializer(news, many=True, context={'request': request}).data,
-                        status.HTTP_200_OK)
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = User.objects.filter(is_active=True)

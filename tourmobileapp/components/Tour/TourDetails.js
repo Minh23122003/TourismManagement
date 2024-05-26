@@ -54,7 +54,7 @@ const TourDetails = ({ route, navigation }) => {
     const getRating = async () => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
-            let token = "9iBzPjjkRz5WJ2tRiik01Ww1a8h2QG"
+            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
             let res = await authApi(token).get(endpoints['rating'](tourId))
             setStars(res.data.stars)
         } catch (ex) {
@@ -77,7 +77,7 @@ const TourDetails = ({ route, navigation }) => {
     const addComment = async () => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
-            let token = "32ps1bRS9FPvDc8BLbk9fm6W86OY6x"
+            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
             let res = await authApi(token).post(endpoints['addCommentTour'](tourId), {
                 'content': content
             })
@@ -91,11 +91,10 @@ const TourDetails = ({ route, navigation }) => {
     const addRating = async (number) => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
-            let token = "9iBzPjjkRz5WJ2tRiik01Ww1a8h2QG"
+            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
             let res = await authApi(token).post(endpoints['addRating'](tourId), {
                 'stars':number
             })
-            setStars(number)
         } catch (ex) {
             console.error(ex)
         }
@@ -122,12 +121,13 @@ const TourDetails = ({ route, navigation }) => {
                                 <Text style={Style.margin}>Ngay ket thuc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
                                 <Text style={Style.margin}>Gia nguoi lon: {tour.price_adult} VND</Text>
                                 <Text style={Style.margin}>Gia tre em: {tour.price_children} VND</Text>
+                                <Text style={Style.margin}>So ve con lai: {tour.remain_ticket}</Text>
                             </View>
                             <View style={{marginStart:40}}>
-                                <AirbnbRating count={5} reviews={['terrible', 'bad', 'ok', 'good', 'very good']} defaultRating={stars} size={20} onFinishRating={(number)=>addRating(number)}/>
+                                <AirbnbRating count={5} reviews={['terrible', 'bad', 'ok', 'good', 'very good']} defaultRating={stars} size={20} onFinishRating={(number)=>{setStars(number); addRating(number)}}/>
                             </View>
                         </View>
-                        <Button style={[{backgroundColor:"lightblue", width:100}]} onPress={() => navigation.navigate('Booking', {tourId : tour.id})}>Dat ve</Button>
+                        <Button style={[{backgroundColor:"lightblue", width:100}]} onPress={() => navigation.navigate('Booking', {tour : tour})}>Dat ve</Button>
                         {tour.tour_image.map(t => <View key={t.id}>
                             <Card.Cover style={Style.margin} source={{uri:t.image}} />
                             <View style={{alignItems:"center"}} >

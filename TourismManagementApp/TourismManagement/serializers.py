@@ -39,9 +39,21 @@ class TourDetailsSerializer(TourSerializer):
     tour_image = TourImageSerializer(many=True)
     destination = DestinationSerializer(many=True)
 
+    remain_ticket = serializers.SerializerMethodField()
+
+    def get_remain_ticket(self, tour):
+        book = Booking.objects.filter(tour_id=tour.id)
+        if book:
+            remain = tour.quantity_ticket
+            for b in book:
+                remain = remain - b.quantity_ticket_adult - b.quantity_ticket_children
+            return remain
+        return tour.quantity_ticket
+
+
     class Meta:
         model = TourSerializer.Meta.model
-        fields = TourSerializer.Meta.fields + ['tour_image'] + ['destination']
+        fields = TourSerializer.Meta.fields + ['tour_image'] + ['destination'] + ['remain_ticket']
 
 
 class TourRating(TourDetailsSerializer):
@@ -126,6 +138,17 @@ class CommentNewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommentNews
         fields = ['id', 'updated_date', 'content', 'user', 'news_id']
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    total = serializers.SerializerMethodField()
+
+    def get_total(self, booking):
+        tour = Tour.objects.get(id=booking.tour_id)
+        return int(tour.price_adult) * int(booking.quantity_ticket_adult) + int(tour.price_children) * int(booking.quantity_ticket_children)
+    class Meta:
+        model = Booking
+        fields = ['id', 'tour_id', 'user_id', 'quantity_ticket_adult', 'quantity_ticket_children'] + ['total']
 
 
 

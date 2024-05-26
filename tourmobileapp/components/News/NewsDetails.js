@@ -53,7 +53,7 @@ const NewsDetails = ({ route }) => {
     const getLike = async () => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
-            let token = "9iBzPjjkRz5WJ2tRiik01Ww1a8h2QG"
+            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
             let res = await authApi(token).get(endpoints['like'](newsId))
             setLike(res.data.active)
         } catch (ex) {
@@ -76,7 +76,7 @@ const NewsDetails = ({ route }) => {
     const addComment = async () => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
-            let token = "9iBzPjjkRz5WJ2tRiik01Ww1a8h2QG"
+            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
             let res = await authApi(token).post(endpoints['addCommentNews'](newsId), {
                 'content': content
             })
@@ -88,7 +88,7 @@ const NewsDetails = ({ route }) => {
     const addLike = async () => {
         try {
             // let token = await AsyncStorage.getItem('access-token')
-            let token = "9iBzPjjkRz5WJ2tRiik01Ww1a8h2QG"
+            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
             let res = await authApi(token).post(endpoints['addLike'](newsId))
             setLike(res.data.active)
         } catch (ex) {
