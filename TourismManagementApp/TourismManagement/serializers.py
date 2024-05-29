@@ -2,7 +2,8 @@ from rest_framework import serializers
 from .models import *
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
+from django.http import JsonResponse
+from django.core.serializers import serialize
 
 class ItemSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
@@ -105,7 +106,7 @@ class LikeSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
-        rep = super().to_representation((instance))
+        rep = super().to_representation(instance)
         rep['avatar'] = instance.avatar.url
 
         return rep
@@ -142,13 +143,18 @@ class CommentNewsSerializer(serializers.ModelSerializer):
 
 class BookingSerializer(serializers.ModelSerializer):
     total = serializers.SerializerMethodField()
+    tour_name = serializers.SerializerMethodField()
+
+    def get_tour_name(self, booking):
+        tour = Tour.objects.get(id=booking.tour_id)
+        return tour.name
 
     def get_total(self, booking):
         tour = Tour.objects.get(id=booking.tour_id)
         return int(tour.price_adult) * int(booking.quantity_ticket_adult) + int(tour.price_children) * int(booking.quantity_ticket_children)
     class Meta:
         model = Booking
-        fields = ['id', 'tour_id', 'user_id', 'quantity_ticket_adult', 'quantity_ticket_children'] + ['total']
+        fields = ['id', 'quantity_ticket_adult', 'quantity_ticket_children'] + ['total'] + ['tour_name']
 
 
 

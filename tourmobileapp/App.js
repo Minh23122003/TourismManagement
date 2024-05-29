@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useReducer } from 'react';
 import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -13,7 +13,12 @@ import Login from "./components/User/Login"
 import Logout from "./components/User/Logout"
 import Register from "./components/User/Register"
 import Profile from "./components/User/Profile"
+import Cart from "./components/User/Cart"
 import { Icon } from 'react-native-paper';
+import { MyDispatchContext, MyUserContext } from './configs/Contexts';
+import { MyUserReducer } from './configs/Reducer';
+
+
 
 const Stack = createNativeStackNavigator();
 
@@ -38,11 +43,9 @@ const NewsStack = () => {
 
 const UserStack = () => {
   return (
-    <Stack.Navigator>
-      <Stack.Screen name="Login" component={Login} options={{title: "Dang nhap"}} />
-      <Stack.Screen name="Logout" component={Logout} options={{title:"Dang xuat"}} />
-      <Stack.Screen name="Register" component={Register} options={{title:"Dang ky"}} />
-      <Stack.Screen name="Profile" component={Profile} options={{title:"Ho so ca nhan"}} />
+    <Stack.Navigator> 
+        <Stack.Screen name="Login" component={Login} options={{title: "Dang nhap"}} />
+        <Stack.Screen name="Register" component={Register} options={{title:"Dang ky"}} /> 
     </Stack.Navigator>
   )
 }
@@ -50,19 +53,32 @@ const UserStack = () => {
 const Tab = createBottomTabNavigator()
 
 const MyTab = () => {
+  const user = useContext(MyUserContext)
+
   return (
     <Tab.Navigator>
       <Tab.Screen name="Home" component={TourStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="home" />, title:"Trang chu"}} />
       <Tab.Screen name="Newss" component={NewsStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="newspaper" />, title:"Tin tuc"}} />
-      <Tab.Screen name="User" component={UserStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="account" />, title:'Dang nhap'}} />
+      {user===null?<>
+        <Tab.Screen name="LogIn" component={UserStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="account-plus" />, title:"Dang nhap"}} />
+      </>:<>
+      <Tab.Screen name="Cart" component={Cart} options={{tabBarIcon: () => <Icon size={30} color='blue' source="cart" />, title:"Gio hang"}} />
+      <Tab.Screen name="Profile" component={Profile} options={{tabBarIcon: () => <Icon size={30} color='blue' source="account-tie" />, title:"Ho so"}} />
+      </>}
     </Tab.Navigator>
   )
 }
 
 const App = () => {
+  const [user, dispatch] = useReducer(MyUserReducer, null)
+
   return (
     <NavigationContainer>
-      <MyTab />
+      <MyUserContext.Provider value={user}>
+        <MyDispatchContext.Provider value={dispatch}>
+          <MyTab />
+        </MyDispatchContext.Provider>
+      </MyUserContext.Provider>
     </NavigationContainer>
   )
 }

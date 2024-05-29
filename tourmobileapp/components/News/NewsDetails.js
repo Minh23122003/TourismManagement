@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useContext } from "react"
 import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from "react-native"
 import APIs, { authApi, endpoints } from "../../configs/APIs"
 import Style from "./Style"
@@ -15,7 +15,7 @@ const NewsDetails = ({ route }) => {
     const [news, setNews] = React.useState(null)
     const { width } = useWindowDimensions();
     const [comment, setComment] = React.useState(null);
-    const [user] = React.useState(2)
+    const user = useContext(MyUserContext)
     const [content, setContent] = React.useState()
     const [page,setPage] = React.useState(1)
     const [loading, setLoading] = React.useState(false)
@@ -50,10 +50,9 @@ const NewsDetails = ({ route }) => {
         }
     }
 
-    const getLike = async () => {
+    const loadLike = async () => {
         try {
-            // let token = await AsyncStorage.getItem('access-token')
-            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
+            let token = await AsyncStorage.getItem('access-token')
             let res = await authApi(token).get(endpoints['like'](newsId))
             setLike(res.data.active)
         } catch (ex) {
@@ -70,13 +69,12 @@ const NewsDetails = ({ route }) => {
     }, [page])
 
     React.useEffect(() => {
-        getLike();
+        loadLike();
     }, [])
 
     const addComment = async () => {
         try {
-            // let token = await AsyncStorage.getItem('access-token')
-            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
+            let token = await AsyncStorage.getItem('access-token')
             let res = await authApi(token).post(endpoints['addCommentNews'](newsId), {
                 'content': content
             })
@@ -87,8 +85,7 @@ const NewsDetails = ({ route }) => {
 
     const addLike = async () => {
         try {
-            // let token = await AsyncStorage.getItem('access-token')
-            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
+            let token = await AsyncStorage.getItem('access-token')
             let res = await authApi(token).post(endpoints['addLike'](newsId))
             setLike(res.data.active)
         } catch (ex) {

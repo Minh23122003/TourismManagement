@@ -16,7 +16,7 @@ const TourDetails = ({ route, navigation }) => {
     const [tour, setTour] = React.useState(null);
     const [comment, setComment] = React.useState(null);
     const { width } = useWindowDimensions();
-    const [user] = React.useState(2)
+    const user = useContext(MyUserContext)
     const [content, setContent] = React.useState()
     const [page,setPage] = React.useState(1)
     const [loading, setLoading] = React.useState(false)
@@ -51,10 +51,9 @@ const TourDetails = ({ route, navigation }) => {
         }
     }
 
-    const getRating = async () => {
+    const loadRating = async () => {
         try {
-            // let token = await AsyncStorage.getItem('access-token')
-            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
+            let token = await AsyncStorage.getItem('access-token')
             let res = await authApi(token).get(endpoints['rating'](tourId))
             setStars(res.data.stars)
         } catch (ex) {
@@ -71,13 +70,12 @@ const TourDetails = ({ route, navigation }) => {
     }, [page])
 
     React.useEffect(() => {
-        getRating();
+        loadRating();
     }, [])
 
     const addComment = async () => {
         try {
-            // let token = await AsyncStorage.getItem('access-token')
-            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
+            let token = await AsyncStorage.getItem('access-token')
             let res = await authApi(token).post(endpoints['addCommentTour'](tourId), {
                 'content': content
             })
@@ -90,8 +88,7 @@ const TourDetails = ({ route, navigation }) => {
 
     const addRating = async (number) => {
         try {
-            // let token = await AsyncStorage.getItem('access-token')
-            let token = "uG0NgVsK5bA387leQUBnJ3kUxnL4BH"
+            let token = await AsyncStorage.getItem('access-token')
             let res = await authApi(token).post(endpoints['addRating'](tourId), {
                 'stars':number
             })
@@ -107,8 +104,8 @@ const TourDetails = ({ route, navigation }) => {
     }
 
     return (
-            <ScrollView style={[Style.margin, Style.container]} onScroll={loadMore}>
-                {<RefreshControl onRefresh={() => {setPage(1), loadComment()}} />}
+            <ScrollView style={[Style.margin, Style.container]} onScroll={loadMore}>   
+                <View>
                 {tour===null?<ActivityIndicator/>:<>
                     <Card key={tour.id}>
                         <Card.Title titleStyle={Style.nameTour} title={tour.name} />
@@ -146,6 +143,10 @@ const TourDetails = ({ route, navigation }) => {
                             </TouchableOpacity>
                     </View>
                 </>}
+                </View>
+                <View>
+                <ScrollView>
+                {<RefreshControl onRefresh={() => {setPage(1), loadComment()}} />}
                 {comment===null?<ActivityIndicator/>:<>
                     {comment.map(c => <View key={c.id} style={[Style.row, {margin:10, backgroundColor:"lightblue"}]}>
                         <Image source={{uri: c.user.avatar}} style={[Style.avatar, Style.margin]} />
@@ -157,6 +158,8 @@ const TourDetails = ({ route, navigation }) => {
                     </View>)}               
                 </>}
                 {loading && page > 1 && <ActivityIndicator/>}
+                </ScrollView>
+                </View>
             </ScrollView>
     )
 }

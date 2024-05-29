@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-vv4q=37mn6$60$%lo#12rq)v@c0o7_6bo2yg^0*lmn1e4-w&3f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.4', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['192.168.1.4', 'localhost', '127.0.0.1', '10.17.64.187']
 
 import pymysql
 
@@ -157,5 +157,7 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLIENT_ID = "1Xfl04lXCtLML94KYttBFXkMr830rZDWMadkirSs"
-CLIENT_SECRET = "oJyFUlcCzbkQQAEj3AgGC6NXEewiUAAA3dPFhNuvxhZdzDUuGoksaZnTNBVWKSn655SAItIU7xp0Jvh2nZ7GqAntBS4mD90Odz5M9jdvvPogzOZibnqXz96wpglxQO6Q"
+OAUTH2_PROVIDER = { 'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore' }
+
+CLIENT_ID = "O0EBKl6Bj2mVuYcSiLmznoaYCGU0uNJPSwvdQpZW"
+CLIENT_SECRET = "Ky8W3yuWDMjYfnYYNLzjo1NJ3RJBVq8wFLqDwX8p0LK1X0xCbAqWWAZEih3hEMLU1ovl5CDRZn0MVcVygjhmh9XS1XwazEpIxPMx0GUnTENpmgYE72pVhLBipijcZP2f"

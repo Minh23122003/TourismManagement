@@ -1,8 +1,20 @@
-import { Text } from "react-native"
+import { useContext } from "react";
+import { Image, Text, View } from "react-native"
+import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
+import Style from "./Style";
+import { Button } from "react-native-paper";
 
 const Profile = () => {
-    return (
-        <Text>profile</Text>
+    const user = useContext(MyUserContext)
+    const dispatch = useContext(MyDispatchContext)
+
+    return(
+        <View style={[Style.container, Style.margin]}>
+            <Text style={Style.text} >Thong tin nguoi dung</Text>
+            <Text style={Style.text} >Chao {user.first_name} {user.last_name}</Text>
+            <Image source={{uri:user.avatar}} style={Style.avatar} />
+            <Button icon="logout" onPress={() => dispatch({"type": "logout"})}>ĐĂNG XUẤT</Button>
+        </View>
     )
 }
 

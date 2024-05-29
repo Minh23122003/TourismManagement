@@ -10,6 +10,7 @@ r.register('tours-category', views.TourCategoryViewSet, basename='tours-category
 r.register('news', views.NewsViewSet, basename='news')
 r.register('news-category', views.NewsCategoryViewSet, basename='news-category')
 r.register('user', views.UserViewSet, basename='user')
+r.register('booking', views.BookingViewSet, basename='booking')
 
 
 

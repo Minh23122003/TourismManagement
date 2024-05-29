@@ -1,33 +1,35 @@
-import React from 'react';
-import { View, Text } from 'react-native';
-import APIs, { endpoints } from '../../configs/APIs';
+import React, { useContext } from 'react';
+import { View, Text, Alert } from 'react-native';
+import APIs, { authApi, endpoints } from '../../configs/APIs';
 import Style from './Style';
 import moment from 'moment';
 import { Button, HelperText, TextInput } from 'react-native-paper';
+import { MyUserContext } from '../../configs/Contexts';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Booking = ({ route, navigation }) => {
     // const tourId = route.params?.tour;
     const [tour, setTour] = React.useState(route.params?.tour);
     const [loading, setLoading] = React.useState(false)
-    const [user] = React.useState(2)
+    const user = useContext(MyUserContext)
     const [ticketAdult, setTicketAdult] = React.useState(0)
     const [ticketChildren, setTicketChildren] = React.useState(0)
 
-    // const loadTour = async () => {
-    //     try {
-    //         setLoading(true)
-    //         let res = await APIs.get(endpoints["tour-details"](tourId))
-    //         setTour(tour)
-    //     } catch (ex) {
-    //         console.error(ex);
-    //     } finally {
-    //         setLoading(false)
-    //     }
-    // }
-
-    // React.useEffect(() => {
-    //     loadTour()
-    // }, [tourId])
+    const addBooking = async () => {
+        try {
+            let token = await AsyncStorage.getItem('access-token')
+            let res = await authApi(token).post(endpoints['addBooking'](tour.id), {
+                'quantity_ticket_adult': ticketAdult,
+                'quantity_ticket_children': ticketChildren
+            })
+            if (res.data.status===406)
+                Alert.alert('Loi', res.data.content, [{text:'ok', onPress: () => navigation.navigate('Booking'), style:"default"}])
+            else
+                Alert.alert('Thanh cong', 'Dat ve thanh cong', [{text:'ok', onPress: () => navigation.navigate('Tour'), style:"default"}])
+        } catch (ex) {
+            console.error(ex)
+        }
+    }
 
 
     return (
@@ -40,7 +42,7 @@ const Booking = ({ route, navigation }) => {
             <Text style={Style.margin}>So ve con lai: {tour.remain_ticket}</Text>
             <TextInput onChangeText={setTicketAdult} placeholder='Nhap so ve nguoi lon' style={[Style.margin, {width:400}]} mode='outlined' keyboardType='numeric' />
             <TextInput onChangeText={setTicketChildren} placeholder='Nhap so ve tre em' style={[Style.margin, {width:400}]} mode='outlined' keyboardType='numeric' />
-            <Button mode='contained' style={Style.margin}>Dat ve</Button>
+            <Button mode='contained' style={Style.margin} onPress={addBooking} >Dat ve</Button>
         </View>
     )
 }
