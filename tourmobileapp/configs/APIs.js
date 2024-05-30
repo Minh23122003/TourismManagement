@@ -10,11 +10,15 @@ export const endpoints = {
     'cateNews': '/news-category/',
     'news': '/news/',
     'news-details': (newsId) => `/news/${newsId}/`,
-    'login': `/o/token/`,
+    'login': '/o/token/',
     'current-user': '/user/current-user/',
     'register': '/user/',
     'commentTour': (tourId) => `/tours/${tourId}/get-comment/`,
+    'deleteCommentTour': (commentTourId) => `/comment-tour/${commentTourId}/`,
+    'patchCommentTour': '/comment-tour/patch-comment-tour/',
     'commentNews': (newsId) => `/news/${newsId}/get-comment/`,
+    'deleteCommentNews': (commentNewsId) => `/comment-news/${commentNewsId}/`,
+    'patchCommentNews': '/comment-news/patch-comment-news/',
     'addCommentTour': (tourId) => `/tours/${tourId}/post-comment/`,
     'addCommentNews': (newsId) => `/news/${newsId}/post-comment/`,
     'addLike': (newsId) => `/news/${newsId}/post-like/`,
@@ -23,7 +27,8 @@ export const endpoints = {
     'rating': (tourId) => `/tours/${tourId}/get-rating/`,
     'addBooking': (tourId) => `/tours/${tourId}/post-booking/`,
     'deleteBooking': (id) => `/booking/${id}/`,
-    'booking': `/user/get-booking/`
+    'booking': '/user/get-booking/',
+    'pay': '/user/pay/'
 }
 
 export const authApi = (token) => {

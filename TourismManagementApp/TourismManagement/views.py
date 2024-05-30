@@ -97,7 +97,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
             for b in book:
                 remain = remain - b.quantity_ticket_adult - b.quantity_ticket_children
         if remain >= (int(request.data.get('quantity_ticket_adult')) + int(request.data.get('quantity_ticket_children'))):
-            booking, created = Booking.objects.get_or_create(user=request.user, tour=self.get_object(), defaults={'quantity_ticket_adult':request.data.get('quantity_ticket_adult'), 'quantity_ticket_children':request.data.get('quantity_ticket_children')})
+            booking, created = Booking.objects.get_or_create(user=request.user, tour=self.get_object(), active=True, defaults={'quantity_ticket_adult':request.data.get('quantity_ticket_adult'), 'quantity_ticket_children':request.data.get('quantity_ticket_children')})
 
             if not created:
                 return JsonResponse({'content': 'Ban da dat ve cho tour nay roi. Vui long huy ve de dat lai!', 'status': 406})
@@ -138,7 +138,7 @@ class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
 
     @action(methods=['get'], url_path='get-comment', detail=True)
     def get_comment(self, request, pk):
-        comments = self.get_object().commentnews_set.select_related('user').order_by('id')
+        comments = self.get_object().commentnews_set.select_related('user').order_by('-id')
 
         paginator = paginators.CommentPaginator()
         page = paginator.paginate_queryset(comments, request)
@@ -203,12 +203,39 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     def get_booking(self, request):
         booking = Booking.objects.filter(user=request.user, active=True).all()
         if not booking:
-            # return JsonResponse({'content': 'Ban chua dat tour nao!', 'status': 204})
-            return Response(None)
+            return JsonResponse({'content': 'Ban chua dat tour nao!'}, status=status.HTTP_204_NO_CONTENT)
         else:
-            return Response(serializers.BookingSerializer(booking, many=True).data)
+            total = 0
+            for b in booking:
+                tour = Tour.objects.get(id=b.tour_id)
+                total = total + int(tour.price_adult) * int(b.quantity_ticket_adult) + int(tour.price_children) * int(b.quantity_ticket_children)
+            return JsonResponse({'results': serializers.BookingSerializer(booking, many=True).data, 'total': total})
+
+    @action(methods=['post'], url_path='pay', detail=False)
+    def pay(self, request):
+        booking = Booking.objects.filter(user=request.data.get('user'))
+        for b in booking:
+            b.active = False
+            b.save()
+        bill = Bill.objects.create(user_id=request.data.get('user_id'), total_price=request.data.get('total'))
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class BookingViewSet(viewsets.ViewSet, generics.DestroyAPIView):
     queryset = Booking.objects.all()
 
+
+class CommentTourViewSet(viewsets.ViewSet, generics.DestroyAPIView):
+    queryset = CommentTour.objects.all()
+
+
+    # @action(methods=['patch'], url_path='patch-comment-tour', detail=False)
+    # def patch_comment_tour(self, request):
+    #     CommentTour.objects.filter(request.data.get('id')).update(content=request.data.get('content'))
+    #
+    #     return Response(status=status.HTTP_200_OK)
+
+
+class CommentNewsViewSet(viewsets.ViewSet, generics.DestroyAPIView):
+    queryset = CommentNews.objects.all()

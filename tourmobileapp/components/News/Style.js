@@ -30,7 +30,7 @@ export default StyleSheet.create({
         height:60,
         borderRadius:10
     }, comment: {
-        width: 300,
+        width: 250,
         backgroundColor: "lightgray",
         padding: 5
     }, button: {

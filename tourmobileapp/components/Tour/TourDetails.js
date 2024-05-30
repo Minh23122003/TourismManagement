@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, useWindowDimensions, Image, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, useWindowDimensions, Image, TouchableOpacity, RefreshControl, Alert } from 'react-native';
 import APIs, { authApi, endpoints } from '../../configs/APIs';
 import Style from './Style';
 import { Button, Card, List, TextInput } from 'react-native-paper';
@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'moment/locale/vi'
 import { isCloseToBottom } from '../Utils/Utils';
 import { Rating, AirbnbRating } from "react-native-ratings"
+import { useNavigation } from '@react-navigation/native';
 
 const TourDetails = ({ route, navigation }) => {
     const tourId = route.params?.tourId;
@@ -21,6 +22,7 @@ const TourDetails = ({ route, navigation }) => {
     const [page,setPage] = React.useState(1)
     const [loading, setLoading] = React.useState(false)
     const [stars, setStars] = React.useState(0)
+    const nav = useNavigation()
 
     const loadTour = async () => {
         try {
@@ -52,13 +54,16 @@ const TourDetails = ({ route, navigation }) => {
     }
 
     const loadRating = async () => {
-        try {
-            let token = await AsyncStorage.getItem('access-token')
-            let res = await authApi(token).get(endpoints['rating'](tourId))
-            setStars(res.data.stars)
-        } catch (ex) {
-            console.error(ex)
+        if (user!==null){
+            try {
+                let token = await AsyncStorage.getItem('access-token')
+                let res = await authApi(token).get(endpoints['rating'](tourId))
+                setStars(res.data.stars)
+            } catch (ex) {
+                console.error(ex)
+            }
         }
+        
     }
 
     React.useEffect(() => {
@@ -74,26 +79,60 @@ const TourDetails = ({ route, navigation }) => {
     }, [])
 
     const addComment = async () => {
-        try {
-            let token = await AsyncStorage.getItem('access-token')
-            let res = await authApi(token).post(endpoints['addCommentTour'](tourId), {
-                'content': content
-            })
-        } catch (ex) {
-            console.error(ex)
-        } finally {
-            loadComment()
+        if(user===null)
+            Alert.alert('Loi', 'Ban chua dang nhap. Vui long dang nhap', [{text:'ok', onPress: () => nav.navigate('LogIn'), style:"default"}])
+        else{
+            try {
+                let token = await AsyncStorage.getItem('access-token')
+                let res = await authApi(token).post(endpoints['addCommentTour'](tourId), {
+                    'content': content
+                })
+                setPage(1)
+            } catch (ex) {
+                console.error(ex)
+            } 
         }
     }
 
-    const addRating = async (number) => {
+    // const patchComment = async (id) => {
+    //     try {
+    //         let token = await AsyncStorage.getItem('access-token')
+    //         let res = await authApi(token).post(endpoints['addCommentTour'](tourId), {
+    //             'content': content
+    //         })
+    //         setPage(1)
+    //     } catch (ex) {
+    //         console.error(ex)
+    //     } finally {
+    //         loadComment()
+    //     }
+    // }
+
+    const deleteComment = async (id) => {
         try {
-            let token = await AsyncStorage.getItem('access-token')
-            let res = await authApi(token).post(endpoints['addRating'](tourId), {
-                'stars':number
-            })
+            let res = await APIs.delete(endpoints['deleteCommentTour'](id))
+            setPage(1)
         } catch (ex) {
             console.error(ex)
+        }
+    }
+
+    const confirmDelete = async (id) => {
+        await Alert.alert('Xac nhan', 'Ban chac chan muon xoa?', [{text:'Co', onPress: () => {deleteComment(id)}, style:"delete"}, {text:'Khong'}])
+    } 
+
+    const addRating = async (number) => {
+        if(user===null)
+            Alert.alert('Loi', 'Ban chua dang nhap. Vui long dang nhap', [{text:'ok', onPress: () => nav.navigate('LogIn'), style:"default"}])
+        else {
+            try {
+                let token = await AsyncStorage.getItem('access-token')
+                let res = await authApi(token).post(endpoints['addRating'](tourId), {
+                    'stars':number
+                })
+            } catch (ex) {
+                console.error(ex)
+            }
         }
     }
 
@@ -135,14 +174,12 @@ const TourDetails = ({ route, navigation }) => {
                 </>}
 
                 <Text style={[Style.nameTour, Style.margin]}>Binh luan</Text>
-                {user===null?<ActivityIndicator/>:<>
                     <View style={[Style.row,{alignItems:"center", justifyContent:"center"}]}>
                             <TextInput value={content} onChangeText={t => setContent(t)} placeholder='Noi dung binh luan' style={Style.comment} />
                             <TouchableOpacity onPress={addComment}>
                                 <Text style={Style.button}>Binh luan</Text>
                             </TouchableOpacity>
                     </View>
-                </>}
                 </View>
                 <View>
                 <ScrollView>
@@ -152,9 +189,15 @@ const TourDetails = ({ route, navigation }) => {
                         <Image source={{uri: c.user.avatar}} style={[Style.avatar, Style.margin]} />
                         <View>
                             <Text style={Style.margin}>Nguoi binh luan: {c.user.first_name} {c.user.last_name}</Text>
-                            <Text style={Style.margin}>{c.content}</Text>
+                            <Text style={Style.margin}>Noi dung: {c.content}</Text>
                             <Text style={Style.margin}>{moment(c.updated_date).fromNow()}</Text>
                         </View>
+                        {user!==null && c.user.id===user.id?<>
+                        <View>
+                            <TouchableOpacity  style={Style.margin}><Text style={[Style.button, {padding:10}]}>Chinh sua</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => confirmDelete(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Xoa</Text></TouchableOpacity>
+                        </View>
+                        </>:<></>}
                     </View>)}               
                 </>}
                 {loading && page > 1 && <ActivityIndicator/>}
