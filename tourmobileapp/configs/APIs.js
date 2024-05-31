@@ -28,7 +28,7 @@ export const endpoints = {
     'addBooking': (tourId) => `/tours/${tourId}/post-booking/`,
     'deleteBooking': (id) => `/booking/${id}/`,
     'booking': '/user/get-booking/',
-    'pay': '/user/pay/'
+    'pay': '/booking/pay/'
 }
 
 export const authApi = (token) => {

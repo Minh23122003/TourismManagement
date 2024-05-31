@@ -211,19 +211,20 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
                 total = total + int(tour.price_adult) * int(b.quantity_ticket_adult) + int(tour.price_children) * int(b.quantity_ticket_children)
             return JsonResponse({'results': serializers.BookingSerializer(booking, many=True).data, 'total': total})
 
+
+
+class BookingViewSet(viewsets.ViewSet, generics.DestroyAPIView):
+    queryset = Booking.objects.all()
+
     @action(methods=['post'], url_path='pay', detail=False)
     def pay(self, request):
-        booking = Booking.objects.filter(user=request.data.get('user'))
+        booking = Booking.objects.filter(user_id=request.data.get('user_id'))
         for b in booking:
             b.active = False
             b.save()
         bill = Bill.objects.create(user_id=request.data.get('user_id'), total_price=request.data.get('total'))
 
         return Response(status=status.HTTP_200_OK)
-
-
-class BookingViewSet(viewsets.ViewSet, generics.DestroyAPIView):
-    queryset = Booking.objects.all()
 
 
 class CommentTourViewSet(viewsets.ViewSet, generics.DestroyAPIView):

@@ -5,22 +5,28 @@ import APIs, { authApi, endpoints } from "../../configs/APIs"
 import Style from "./Style"
 import { MyUserContext } from "../../configs/Contexts"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { useNavigation } from "@react-navigation/native"
 
 const Cart = ({navigation}) => {
     const user = useContext(MyUserContext)
     const [booking, setBooking] = React.useState(null)
     const [total, setTotal] = React.useState(0)
     const [quantityBooking, setQuantityBooking] = React.useState(0)
+    const [content, setContent] = React.useState("")
 
     const loadBooking = async () => {
         try {
             let token = await AsyncStorage.getItem('access-token')
             let res = await authApi(token).get(endpoints['booking'])
-            if (res.status===204)
+            console.info(res.data)
+            if (res.status===204){
                 setBooking(null)
+                setContent(res.data.content)
+            }
             else {
                 setBooking(res.data.results)
                 setTotal(res.data.total)
+                setContent(null)
             }
             setQuantityBooking(res.data.results.length)
         } catch (ex) {
@@ -47,11 +53,13 @@ const Cart = ({navigation}) => {
         try {
             console.info(user)
             console.info(total)
+            console.info(quantityBooking)
             let res =await APIs.post(endpoints["pay"], {
-                "user": user,
+                "user_id": user.id,
                 "total": total
             })
             setQuantityBooking(0)
+            navigation.navigate('Cart')
         } catch (ex) {
             console.error(ex)
         }
@@ -68,8 +76,7 @@ const Cart = ({navigation}) => {
     return (
         <ScrollView style={[Style.container, {}]}>
             <RefreshControl onRefresh={() => loadBooking()} />
-            {user===null?<Text>Ban chua dang nhap. Vui long dang nhap de xem!</Text>:<>
-                {booking===null?<Text>Ban chua dat tour nao</Text>:<>
+                {content!==null?<Text>Ban chua dat tour nao</Text>:<>
                     {booking.map(b => <View key={b.id} style={[Style.container, Style.margin, Style.booking, Style.row, {width:400}]}>
                         <View style={[Style.margin, {flex:1}]}>
                             <Text>{b.tour_name}</Text>
@@ -84,7 +91,6 @@ const Cart = ({navigation}) => {
                     <Text>Tong tien: {total}</Text>
                     <TouchableOpacity onPress={() => confirmPay()} style={[Style.pay]}><Text>Thanh toan</Text></TouchableOpacity>
                 </>}
-            </>}
         </ScrollView>
     )
 }
