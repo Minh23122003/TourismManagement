@@ -40,7 +40,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
             except:
                 queries = queries
             destination = self.request.query_params.get('destination')
-            destination = Destination.objects.filter(location=destination)
+            destination = Destination.objects.filter(location__icontains=destination)
             if destination:
                 queries = queries.filter(destination__in=destination).distinct()
             cate_id = self.request.query_params.get('cate_id')

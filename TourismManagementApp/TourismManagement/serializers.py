@@ -1,9 +1,6 @@
 from rest_framework import serializers
 from .models import *
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.http import JsonResponse
-from django.core.serializers import serialize
 
 class ItemSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
@@ -16,7 +13,7 @@ class ItemSerializer(serializers.ModelSerializer):
 class DestinationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Destination
-        fields = '__all__'
+        fields = ['id', 'name', 'location']
 
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -120,7 +117,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'first_name', 'last_name']
+        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'avatar', 'email']
         extra_kwargs = {
             'password': {
                 'write_only': True

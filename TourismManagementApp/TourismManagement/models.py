@@ -7,7 +7,7 @@ from cloudinary.models import CloudinaryField
 
 
 class User(AbstractUser):
-    avatar = CloudinaryField(null=False)
+    avatar = CloudinaryField(null=True)
 
 
 class BaseModel(models.Model):
