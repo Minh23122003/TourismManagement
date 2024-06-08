@@ -16,18 +16,22 @@ const Booking = ({ route, navigation }) => {
     const [ticketChildren, setTicketChildren] = React.useState(0)
 
     const addBooking = async () => {
-        try {
-            let token = await AsyncStorage.getItem('access-token')
-            let res = await authApi(token).post(endpoints['addBooking'](tour.id), {
-                'quantity_ticket_adult': ticketAdult,
-                'quantity_ticket_children': ticketChildren
-            })
-            if (res.data.status===406)
-                Alert.alert('Loi', res.data.content, [{text:'ok', onPress: () => navigation.navigate('Booking'), style:"default"}])
-            else
-                Alert.alert('Thanh cong', 'Dat ve thanh cong', [{text:'ok', onPress: () => navigation.navigate('Tour'), style:"default"}])
-        } catch (ex) {
-            console.error(ex)
+        if ((parseInt(ticketAdult) + parseInt(ticketChildren)) > tour.remain_ticket)
+            Alert.alert('Lỗi', "Số lượng vé đặt vượt quá số lượng vé còn lại", [{text:'Ok', onPress: () => navigation.navigate('Booking'), style:"default"}])
+        else {
+            try {
+                let token = await AsyncStorage.getItem('access-token')
+                let res = await authApi(token).post(endpoints['addBooking'](tour.id), {
+                    'quantity_ticket_adult': ticketAdult,
+                    'quantity_ticket_children': ticketChildren
+                })
+                if (res.data.status===406)
+                    Alert.alert('Lỗi', res.data.content, [{text:'Ok', onPress: () => navigation.navigate('Booking'), style:"default"}])
+                else
+                    Alert.alert('Thành công', 'Đặt vé thành công', [{text:'Ok', onPress: () => navigation.navigate('Tour'), style:"default"}])
+            } catch (ex) {
+                console.error(ex)
+            }
         }
     }
 
@@ -35,14 +39,14 @@ const Booking = ({ route, navigation }) => {
     return (
         <View style={{marginStart:20}}>
             <Text style={[Style.nameTour, Style.margin]}>{tour.name}</Text>
-            <Text style={Style.margin}>Ngay bat dau: {moment(tour.start_date).format('DD-MM-YYYY')}</Text>
-            <Text style={Style.margin}>Ngay ket thuc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
-            <Text style={Style.margin}>Gia nguoi lon: {tour.price_adult} VND</Text>
-            <Text style={Style.margin}>Gia tre em: {tour.price_children} VND</Text>
-            <Text style={Style.margin}>So ve con lai: {tour.remain_ticket}</Text>
-            <TextInput onChangeText={setTicketAdult} placeholder='Nhap so ve nguoi lon' style={[Style.margin, {width:400}]} mode='outlined' keyboardType='numeric' />
-            <TextInput onChangeText={setTicketChildren} placeholder='Nhap so ve tre em' style={[Style.margin, {width:400}]} mode='outlined' keyboardType='numeric' />
-            <Button mode='contained' style={Style.margin} onPress={addBooking} >Dat ve</Button>
+            <Text style={Style.margin}>Ngày bắt đầu: {moment(tour.start_date).format('DD-MM-YYYY')}</Text>
+            <Text style={Style.margin}>Ngày kết thúc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
+            <Text style={Style.margin}>Giá người lớn: {tour.price_adult} VND</Text>
+            <Text style={Style.margin}>Giá trẻ em: {tour.price_children} VND</Text>
+            <Text style={Style.margin}>Số vé còn lại: {tour.remain_ticket}</Text>
+            <TextInput onChangeText={setTicketAdult} placeholder='Nhập số vé người lớn' style={[Style.margin, {width:400}]} mode='outlined' keyboardType='numeric' />
+            <TextInput onChangeText={setTicketChildren} placeholder='Nhập số vé trẻ em' style={[Style.margin, {width:400}]} mode='outlined' keyboardType='numeric' />
+            <Button mode='contained' style={Style.margin} onPress={addBooking} >Đặt vé</Button>
         </View>
     )
 }

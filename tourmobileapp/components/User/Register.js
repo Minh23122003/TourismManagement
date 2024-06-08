@@ -18,6 +18,18 @@ const Register = () => {
         "icon": "text",
         "field": "last_name"
     }, {
+        "label": "Email",
+        "icon": "email",
+        "field": "email"
+    }, {
+        "label": "Số điện thoại",
+        "icon": "phone",
+        "field": "phone"
+    }, {
+        "label": "Địa chỉ",
+        "icon": "address",
+        "field": "address"
+    }, {
         "label": "Tên đăng nhập",
         "icon": "account",
         "field": "username"
@@ -53,7 +65,7 @@ const Register = () => {
         })
     }
 
-    const register = async () => {
+    const Register = async () => {
         if(user.password !== user.confirm)
             setErr(true)
         else {
@@ -94,7 +106,7 @@ const Register = () => {
         <View style={[Style.container, Style.margin]}>
             <KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':"height"}>
             <ScrollView>
-                <Text style={Style.text}>Dang ky nguoi dung</Text>
+                <Text style={Style.text}>Đăng ký người dùng</Text>
 
                 {fields.map(f => <TextInput secureTextEntry={f.secureTextEntry} value={user[f.field]} onChangeText={t => change(f.field, t)} style={Style.margin} key={f.field} label={f.label} right={<TextInput.Icon icon={f.icon} />} />)}
 
@@ -103,11 +115,11 @@ const Register = () => {
                 </HelperText>
 
                 <TouchableRipple style={Style.margin} onPress={picker}>
-                    <Text>Chon anh dai dien ...</Text>
+                    <Text>Chọn ảnh đại diện ...</Text>
                 </TouchableRipple>
 
                 {user.avatar && <Image source={{uri: user.avatar.uri}} style={Style.avatar} />}
-                <Button icon="account" loading={loading} mode="contained" onPress={register} >Dang ky</Button>
+                <Button icon="account" loading={loading} mode="contained" onPress={Register} >Dang ky</Button>
             </ScrollView>
             </KeyboardAvoidingView>
         </View>

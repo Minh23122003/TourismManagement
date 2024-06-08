@@ -75,12 +75,12 @@ const Tour = ({route, navigation}) => {
                 </>}
             </View>
             <View>
-                <Searchbar style={Style.margin} placeholder="Tim gia thap nhat" value={priceMin} onChangeText={t => search(t, setPriceMin)} />
-                <Searchbar style={Style.margin} placeholder="Tim gia cao nhat nhat" value={priceMax} onChangeText={t => search(t, setPriceMax)} />
-                <Searchbar style={Style.margin} placeholder="Tim ngay di: dd-mm-yyyy" value={date} onChangeText={t => search(t, setDate)} />
-                <Searchbar style={Style.margin} placeholder="Nhap diem den" value={destination} onChangeText={t => search(t, setDestination)} />
+                <Searchbar style={Style.margin} placeholder="Nhập giá thấp nhất" value={priceMin} onChangeText={t => search(t, setPriceMin)} />
+                <Searchbar style={Style.margin} placeholder="Nhập giá cao nhất" value={priceMax} onChangeText={t => search(t, setPriceMax)} />
+                <Searchbar style={Style.margin} placeholder="Nhập ngày đi: dd-mm-yyyy" value={date} onChangeText={t => search(t, setDate)} />
+                <Searchbar style={Style.margin} placeholder="Nhập điểm đến" value={destination} onChangeText={t => search(t, setDestination)} />
             </View>
-            <Text style={{fontSize:30, fontWeight:"bold"}}>Danh sach tour du lich</Text>
+            <Text style={{fontSize:30, fontWeight:"bold"}}>Danh sách tour du lịch</Text>
             <ScrollView onScroll={loadMore}>
                 <RefreshControl onRefresh={() => loadTours()} />
                 {loading && <ActivityIndicator />}

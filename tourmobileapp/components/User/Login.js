@@ -62,11 +62,11 @@ const Login = () => {
     return (
         <View style={[Style.container, Style.margin]}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
-                <Text style={Style.text}>Dang nhap nguoi dung</Text>
+                <Text style={Style.text}>Đăng nhập</Text>
                 {fields.map(f => <TextInput secureTextEntry={f.secureTextEntry} value={user[f.field]} onChangeText={t => change(f.field, t)} style={Style.margin} key={f.field} label={f.label} right={<TextInput.Icon icon={f.icon} />} />)}
-                <Button icon="account" loading={loading} mode="contained" onPress={login}>Dang nhap</Button>
-                <Text style={Style.margin}>Ban chua co tai khoan? Nhan dang ky </Text>
-                <Button style={Style.margin} mode="contained" onPress={() => nav.navigate('Register')} >Dang ky</Button>
+                <Button icon="account" loading={loading} mode="contained" onPress={login}>ĐĂNG NHẬP</Button>
+                <Text style={Style.margin}>Bạn chưa có tài khoản? Nhấn đăng ký </Text>
+                <Button style={Style.margin} mode="contained" onPress={() => nav.navigate('Register')} >ĐĂNG KÝ</Button>
             </KeyboardAvoidingView>
         </View>
     )

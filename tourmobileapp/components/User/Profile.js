@@ -9,13 +9,13 @@ const Profile = () => {
     const dispatch = useContext(MyDispatchContext)
 
     const confirmLogout = async () => {
-        await Alert.alert('Xac nhan', 'Ban chac chan muon thoat?', [{text:'Co', onPress: () => {dispatch({"type": "logout"})}, style:"delete"}, {text:'Khong'}])
+        await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn thoát?', [{text:'Có', onPress: () => {dispatch({"type": "logout"})}, style:"delete"}, {text:'Không'}])
     }
 
     return(
         <View style={[Style.container, Style.margin]}>
-            <Text style={Style.text} >Thong tin nguoi dung</Text>
-            <Text style={Style.text} >Chao {user.first_name} {user.last_name}</Text>
+            <Text style={Style.text} >Thông tin người dùng</Text>
+            <Text style={Style.text} >Chào {user.first_name} {user.last_name}</Text>
             <Image source={{uri:user.avatar}} style={Style.avatar} />
             <Button icon="logout" onPress={() => confirmLogout()}>ĐĂNG XUẤT</Button>
         </View>

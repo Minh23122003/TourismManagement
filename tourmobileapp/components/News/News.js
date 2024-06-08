@@ -68,7 +68,7 @@ const News = ({route, navigation}) => {
                     {categories.map(c => <Chip onPress={() => search(c.id, setCateId)} mode={cateId===c.id?"outlined":"flat"} key={c.id} style={Style.margin} icon="shape-outline">{c.name}</Chip>)}
                 </>}
             </View>
-            <Text style={{fontSize:30, fontWeight:"bold"}}>Cac tin tuc moi</Text>
+            <Text style={{fontSize:30, fontWeight:"bold"}}>Các tin tức mới</Text>
             <ScrollView onScroll={loadMore}>
                 <RefreshControl onRefresh={() => loadTours()} />
                 {loading && <ActivityIndicator />}

@@ -91,19 +91,12 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
 
     @action(methods=['post'], url_path='post-booking', detail=True)
     def post_booking(self, request, pk):
-        book = Booking.objects.filter(tour_id=self.get_object().id)
-        remain = self.get_object().quantity_ticket
-        if book:
-            for b in book:
-                remain = remain - b.quantity_ticket_adult - b.quantity_ticket_children
-        if remain >= (int(request.data.get('quantity_ticket_adult')) + int(request.data.get('quantity_ticket_children'))):
-            booking, created = Booking.objects.get_or_create(user=request.user, tour=self.get_object(), active=True, defaults={'quantity_ticket_adult':request.data.get('quantity_ticket_adult'), 'quantity_ticket_children':request.data.get('quantity_ticket_children')})
 
-            if not created:
-                return JsonResponse({'content': 'Ban da dat ve cho tour nay roi. Vui long huy ve de dat lai!', 'status': 406})
-            return Response(serializers.BookingSerializer(booking).data, status=status.HTTP_200_OK)
-        else:
-            return JsonResponse({'content': 'Tong so ve phai nho hon hoac bang so ve con lai. Vui long kiem tra lai!', 'status': 406})
+        booking, created = Booking.objects.get_or_create(user=request.user, tour=self.get_object(), active=True, defaults={'quantity_ticket_adult':request.data.get('quantity_ticket_adult'), 'quantity_ticket_children':request.data.get('quantity_ticket_children')})
+
+        if not created:
+            return JsonResponse({'content': 'Ban da dat ve cho tour nay roi. Vui long huy ve de dat lai!', 'status': 406})
+        return Response(serializers.BookingSerializer(booking).data, status=status.HTTP_200_OK)
 
 
 class TourCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):

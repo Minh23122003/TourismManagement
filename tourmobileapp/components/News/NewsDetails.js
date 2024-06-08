@@ -78,7 +78,7 @@ const NewsDetails = ({ route }) => {
 
     const addComment = async () => {
         if(user===null)
-            Alert.alert('Loi', 'Ban chua dang nhap. Vui long dang nhap', [{text:'ok', onPress: () => nav.navigate('LogIn'), style:"default"}])
+            Alert.alert('Lỗi', 'Bạn chưa đăng nhập. Vui lòng đăng nhập để bình luận', [{text:'Ok', onPress: () => nav.navigate('LogIn'), style:"default"}])
         else {
             try {
                 let token = await AsyncStorage.getItem('access-token')
@@ -86,6 +86,7 @@ const NewsDetails = ({ route }) => {
                     'content': content
                 })
                 setPage(1)
+                setContent(null)
             } catch (ex) {
                 console.error(ex)
             }
@@ -102,12 +103,12 @@ const NewsDetails = ({ route }) => {
     }
 
     const confirmDelete = async (id) => {
-        await Alert.alert('Xac nhan', 'Ban chac chan muon xoa?', [{text:'Co', onPress: () => {deleteComment(id)}, style:"delete"}, {text:'Khong'}])
+        await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn xóa?', [{text:'Có', onPress: () => {deleteComment(id)}, style:"delete"}, {text:'Không'}])
     } 
 
     const addLike = async () => {
         if(user===null)
-            Alert.alert('Loi', 'Ban chua dang nhap. Vui long dang nhap', [{text:'ok', onPress: () => nav.navigate('LogIn'), style:"default"}])
+            Alert.alert('Lỗi', 'Bạn chưa đăng nhập. Vui lòng đăng nhập', [{text:'Ok', onPress: () => nav.navigate('LogIn'), style:"default"}])
         else {
             try {
                 let token = await AsyncStorage.getItem('access-token')
@@ -144,11 +145,11 @@ const NewsDetails = ({ route }) => {
 
                 <Chip onPress={() => addLike()} style={[Style.margin, {width:100, backgroundColor: like===true?"lightblue":"white"}]} icon="heart">Thich</Chip>
 
-                <Text style={[Style.text, Style.margin]}>Binh luan</Text>
+                <Text style={[Style.text, Style.margin]}>Bình luận</Text>
                 <View style={[Style.row,{alignItems:"center", justifyContent:"center"}]}>
-                        <TextInput value={content} onChangeText={t => setContent(t)} placeholder='Noi dung binh luan' style={Style.comment} />
+                        <TextInput value={content} onChangeText={t => setContent(t)} placeholder='Nội dung bình luận' style={Style.comment} />
                         <TouchableOpacity onPress={addComment}>
-                            <Text style={Style.button}>Binh luan</Text>
+                            <Text style={Style.button}>Bình luận</Text>
                         </TouchableOpacity>
                 </View>
 
@@ -156,14 +157,14 @@ const NewsDetails = ({ route }) => {
                     {comment.map(c => <View key={c.id} style={[Style.row, {margin:10, backgroundColor:"lightblue"}]}>
                         <Image source={{uri: c.user.avatar}} style={[Style.avatar, Style.margin]} />
                         <View>
-                            <Text style={Style.margin}>Nguoi binh luan: {c.user.first_name} {c.user.last_name}</Text>
+                            <Text style={Style.margin}>Người bình luận: {c.user.first_name} {c.user.last_name}</Text>
                             <Text style={Style.margin}>{c.content}</Text>
                             <Text style={Style.margin}>{moment(c.updated_date).fromNow()}</Text>
                         </View>
                         {user !== null && c.user.id===user.id?<>
                         <View>
-                            <TouchableOpacity  style={Style.margin}><Text style={[Style.button, {padding:10}]}>Chinh sua</Text></TouchableOpacity>
-                            <TouchableOpacity onPress={() => confirmDelete(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Xoa</Text></TouchableOpacity>
+                            <TouchableOpacity  style={Style.margin}><Text style={[Style.button, {padding:10}]}>Chỉnh sửa</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => confirmDelete(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Xóa</Text></TouchableOpacity>
                         </View>
                         </>:<></>}
                     </View>)}               

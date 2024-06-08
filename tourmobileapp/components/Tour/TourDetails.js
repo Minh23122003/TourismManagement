@@ -80,7 +80,7 @@ const TourDetails = ({ route, navigation }) => {
 
     const addComment = async () => {
         if(user===null)
-            Alert.alert('Loi', 'Ban chua dang nhap. Vui long dang nhap', [{text:'ok', onPress: () => nav.navigate('LogIn'), style:"default"}])
+            Alert.alert('Lỗi', 'Bạn chưa đăng nhập. Vui lòng đăng nhập để bình luận', [{text:'Ok', onPress: () => nav.navigate('LogIn'), style:"default"}])
         else{
             try {
                 let token = await AsyncStorage.getItem('access-token')
@@ -88,6 +88,7 @@ const TourDetails = ({ route, navigation }) => {
                     'content': content
                 })
                 setPage(1)
+                setContent(null)
             } catch (ex) {
                 console.error(ex)
             } 
@@ -118,12 +119,12 @@ const TourDetails = ({ route, navigation }) => {
     }
 
     const confirmDelete = async (id) => {
-        await Alert.alert('Xac nhan', 'Ban chac chan muon xoa?', [{text:'Co', onPress: () => {deleteComment(id)}, style:"delete"}, {text:'Khong'}])
+        await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn xóa?', [{text:'Có', onPress: () => {deleteComment(id)}, style:"delete"}, {text:'Không'}])
     } 
 
     const addRating = async (number) => {
         if(user===null)
-            Alert.alert('Loi', 'Ban chua dang nhap. Vui long dang nhap', [{text:'ok', onPress: () => nav.navigate('LogIn'), style:"default"}])
+            Alert.alert('Lỗi', 'Bạn chưa đăng nhập. Vui lòng đăng nhập để đánh giá', [{text:'Ok', onPress: () => nav.navigate('LogIn'), style:"default"}])
         else {
             try {
                 let token = await AsyncStorage.getItem('access-token')
@@ -153,17 +154,17 @@ const TourDetails = ({ route, navigation }) => {
                         </Card.Content>
                         <View style={Style.row}>
                             <View>
-                                <Text style={Style.margin}>Ngay bat dau: {moment(tour.start_date).format('DD-MM-YYYY')}</Text>
-                                <Text style={Style.margin}>Ngay ket thuc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
-                                <Text style={Style.margin}>Gia nguoi lon: {tour.price_adult} VND</Text>
-                                <Text style={Style.margin}>Gia tre em: {tour.price_children} VND</Text>
-                                <Text style={Style.margin}>So ve con lai: {tour.remain_ticket}</Text>
+                                <Text style={Style.margin}>Ngày bắt đầu: {moment(tour.start_date).format('DD-MM-YYYY')}</Text>
+                                <Text style={Style.margin}>Ngày kết thúc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
+                                <Text style={Style.margin}>Giá người lớn: {tour.price_adult} VND</Text>
+                                <Text style={Style.margin}>Giá trẻ em: {tour.price_children} VND</Text>
+                                <Text style={Style.margin}>Số vé còn lại: {tour.remain_ticket}</Text>
                             </View>
                             <View style={{marginStart:40}}>
                                 <AirbnbRating count={5} reviews={['terrible', 'bad', 'ok', 'good', 'very good']} defaultRating={stars} size={20} onFinishRating={(number)=>{setStars(number); addRating(number)}}/>
                             </View>
                         </View>
-                        <Button style={[{backgroundColor:"lightblue", width:100}]} onPress={() => navigation.navigate('Booking', {tour : tour})}>Dat ve</Button>
+                        <Button style={[{backgroundColor:"lightblue", width:100}]} onPress={() => navigation.navigate('Booking', {tour : tour})}>Đặt vé</Button>
                         {tour.tour_image.map(t => <View key={t.id}>
                             <Card.Cover style={Style.margin} source={{uri:t.image}} />
                             <View style={{alignItems:"center"}} >
@@ -173,11 +174,11 @@ const TourDetails = ({ route, navigation }) => {
                     </Card>
                 </>}
 
-                <Text style={[Style.nameTour, Style.margin]}>Binh luan</Text>
+                <Text style={[Style.nameTour, Style.margin]}>Bình luận</Text>
                     <View style={[Style.row,{alignItems:"center", justifyContent:"center"}]}>
-                            <TextInput value={content} onChangeText={t => setContent(t)} placeholder='Noi dung binh luan' style={Style.comment} />
+                            <TextInput value={content} onChangeText={t => setContent(t)} placeholder='Nội dung bình luận' style={Style.comment} />
                             <TouchableOpacity onPress={addComment}>
-                                <Text style={Style.button}>Binh luan</Text>
+                                <Text style={Style.button}>Bình luận</Text>
                             </TouchableOpacity>
                     </View>
                 </View>
@@ -188,14 +189,14 @@ const TourDetails = ({ route, navigation }) => {
                     {comment.map(c => <View key={c.id} style={[Style.row, {margin:10, backgroundColor:"lightblue"}]}>
                         <Image source={{uri: c.user.avatar}} style={[Style.avatar, Style.margin]} />
                         <View>
-                            <Text style={Style.margin}>Nguoi binh luan: {c.user.first_name} {c.user.last_name}</Text>
-                            <Text style={Style.margin}>Noi dung: {c.content}</Text>
+                            <Text style={Style.margin}>Người bình luận: {c.user.first_name} {c.user.last_name}</Text>
+                            <Text style={Style.margin}>{c.content}</Text>
                             <Text style={Style.margin}>{moment(c.updated_date).fromNow()}</Text>
                         </View>
                         {user!==null && c.user.id===user.id?<>
                         <View>
-                            <TouchableOpacity  style={Style.margin}><Text style={[Style.button, {padding:10}]}>Chinh sua</Text></TouchableOpacity>
-                            <TouchableOpacity onPress={() => confirmDelete(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Xoa</Text></TouchableOpacity>
+                            <TouchableOpacity  style={Style.margin}><Text style={[Style.button, {padding:10}]}>Chỉnh sửa</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => confirmDelete(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Xóa</Text></TouchableOpacity>
                         </View>
                         </>:<></>}
                     </View>)}               

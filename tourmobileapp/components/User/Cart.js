@@ -51,9 +51,6 @@ const Cart = ({navigation}) => {
 
     const pay = async () => {
         try {
-            console.info(user)
-            console.info(total)
-            console.info(quantityBooking)
             let res =await APIs.post(endpoints["pay"], {
                 "user_id": user.id,
                 "total": total
@@ -66,30 +63,30 @@ const Cart = ({navigation}) => {
     }
 
     const confirmDelete = async (id) => {
-        await Alert.alert('Xac nhan', 'Ban chac chan muon xoa?', [{text:'Co', onPress: () => {deleteBooking(id)}, style:"delete"}, {text:'Khong'}])
+        await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn xóa?', [{text:'Có', onPress: () => {deleteBooking(id)}, style:"delete"}, {text:'Không'}])
     }
     
     const confirmPay = async () => {
-        await Alert.alert('Xac nhan', 'Ban xac nhan thanh toan??', [{text:'Co', onPress: () => {pay()}}, {text:'Khong'}])
+        await Alert.alert('Xác nhận', 'Ban xác nhận thanh toán??', [{text:'Có', onPress: () => {pay()}}, {text:'Không'}])
     }
 
     return (
         <ScrollView style={[Style.container, {}]}>
             <RefreshControl onRefresh={() => loadBooking()} />
-                {content!==null?<Text>Ban chua dat tour nao</Text>:<>
+                {content!==null?<Text>Bạn chưa đặt tour nào</Text>:<>
                     {booking.map(b => <View key={b.id} style={[Style.container, Style.margin, Style.booking, Style.row, {width:400}]}>
                         <View style={[Style.margin, {flex:1}]}>
                             <Text>{b.tour_name}</Text>
-                            <Text>So luong ve nguoi lon: {b.quantity_ticket_adult}</Text>
-                            <Text>So luong ve tre em: {b.quantity_ticket_children}</Text>
+                            <Text>Số lượng vé người lớn: {b.quantity_ticket_adult}</Text>
+                            <Text>Số lượng vé trẻ em: {b.quantity_ticket_children}</Text>
                         </View>
                         <View style={[Style.margin, {flex:1}]}>
-                            <Text>Tong tien: {b.total}</Text>
-                            <TouchableOpacity style={[Style.button, {width:70, marginTop:10, padding:5}]} key={b.id} onPress={() => confirmDelete(b.id)} ><Text>Huy ve</Text></TouchableOpacity>
+                            <Text>Tổng tiền: {b.total}</Text>
+                            <TouchableOpacity style={[Style.button, {width:70, marginTop:10, padding:5}]} key={b.id} onPress={() => confirmDelete(b.id)} ><Text>Hủy vé</Text></TouchableOpacity>
                         </View>
                     </View>)}
-                    <Text>Tong tien: {total}</Text>
-                    <TouchableOpacity onPress={() => confirmPay()} style={[Style.pay]}><Text>Thanh toan</Text></TouchableOpacity>
+                    <Text>Tổng cộng: {total}</Text>
+                    <TouchableOpacity onPress={() => confirmPay()} style={[Style.pay]}><Text>Thanh toán</Text></TouchableOpacity>
                 </>}
         </ScrollView>
     )
