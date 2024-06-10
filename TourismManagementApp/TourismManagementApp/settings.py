@@ -115,7 +115,7 @@ cloudinary.config(
     api_secret="RoCUyh0je2qJ79EnJMhu-3cmyIY"
 )
 
-OAUTH2_PROVIDER = { 'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore' }
+OAUTH2_PROVIDER = { 'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore', }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -158,5 +158,5 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLIENT_ID = "O0EBKl6Bj2mVuYcSiLmznoaYCGU0uNJPSwvdQpZW"
-CLIENT_SECRET = "Ky8W3yuWDMjYfnYYNLzjo1NJ3RJBVq8wFLqDwX8p0LK1X0xCbAqWWAZEih3hEMLU1ovl5CDRZn0MVcVygjhmh9XS1XwazEpIxPMx0GUnTENpmgYE72pVhLBipijcZP2f"
+CLIENT_ID = "vQ5UUjIzqg3ineVTIqb0WdIfinhKJRDGqeuqvSPn"
+CLIENT_SECRET = "ZaljW7t1dekYn4ZULoAQboGQKNlZ04mrPQvDkrsmwkMZW39U2di2F8t8t7ttmhzCjONra9WbHTvhcHgd6ToxhqDbvUfagMkbfwM1DRcarzQoe1Xy0eqakdW6wYhausH6"

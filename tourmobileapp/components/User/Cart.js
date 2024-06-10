@@ -30,13 +30,13 @@ const Cart = ({navigation}) => {
             }
             setQuantityBooking(res.data.results.length)
         } catch (ex) {
-            console.error(ex)
+            // console.error(ex)
         }
     }
 
     React.useEffect(() => {
         loadBooking()
-    })
+    }, [quantityBooking])
 
     const deleteBooking =async (id) => {     
             try {
@@ -70,24 +70,33 @@ const Cart = ({navigation}) => {
         await Alert.alert('Xác nhận', 'Ban xác nhận thanh toán??', [{text:'Có', onPress: () => {pay()}}, {text:'Không'}])
     }
 
+    const [refreshing, setRefreshing] = React.useState(false);
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => {
+            loadBooking()
+            setRefreshing(false);
+        }, 2000);
+    }, []);
+
     return (
-        <ScrollView style={[Style.container, {}]}>
-            <RefreshControl onRefresh={() => loadBooking()} />
-                {content!==null?<Text>Bạn chưa đặt tour nào</Text>:<>
-                    {booking.map(b => <View key={b.id} style={[Style.container, Style.margin, Style.booking, Style.row, {width:400}]}>
-                        <View style={[Style.margin, {flex:1}]}>
-                            <Text>{b.tour_name}</Text>
-                            <Text>Số lượng vé người lớn: {b.quantity_ticket_adult}</Text>
-                            <Text>Số lượng vé trẻ em: {b.quantity_ticket_children}</Text>
-                        </View>
-                        <View style={[Style.margin, {flex:1}]}>
-                            <Text>Tổng tiền: {b.total}</Text>
-                            <TouchableOpacity style={[Style.button, {width:70, marginTop:10, padding:5}]} key={b.id} onPress={() => confirmDelete(b.id)} ><Text>Hủy vé</Text></TouchableOpacity>
-                        </View>
-                    </View>)}
-                    <Text>Tổng cộng: {total}</Text>
-                    <TouchableOpacity onPress={() => confirmPay()} style={[Style.pay]}><Text>Thanh toán</Text></TouchableOpacity>
-                </>}
+        <ScrollView style={[Style.container, {}]} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} >
+            {content!==null?<Text style={Style.margin} >Bạn chưa đặt tour nào</Text>:<>
+                {booking.map(b => <View key={b.id} style={[Style.container, Style.margin, Style.booking, Style.row, {width:400}]}>
+                    <View style={[Style.margin, {flex:1}]}>
+                        <Text>{b.tour_name}</Text>
+                        <Text>Số lượng vé người lớn: {b.quantity_ticket_adult}</Text>
+                        <Text>Số lượng vé trẻ em: {b.quantity_ticket_children}</Text>
+                    </View>
+                    <View style={[Style.margin, {flex:1}]}>
+                        <Text>Tổng tiền: {b.total}</Text>
+                        <TouchableOpacity style={[Style.button, {width:70, marginTop:10, padding:5}]} key={b.id} onPress={() => confirmDelete(b.id)} ><Text>Hủy vé</Text></TouchableOpacity>
+                    </View>
+                </View>)}
+                <Text>Tổng cộng: {total}</Text>
+                <TouchableOpacity onPress={() => confirmPay()} style={[Style.pay]}><Text>Thanh toán</Text></TouchableOpacity>
+            </>}
         </ScrollView>
     )
 }

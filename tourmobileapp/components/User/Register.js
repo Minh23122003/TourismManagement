@@ -9,6 +9,7 @@ import { HelperText, TouchableRipple, Button, TextInput } from "react-native-pap
 const Register = () => {
     const [user, setUser] = React.useState({})
     const [err, setErr] = React.useState(false)
+    const [contentErr, setContentErr] = React.useState("")
     const fields = [{
         "label": "Tên",
         "icon": "text",
@@ -27,7 +28,7 @@ const Register = () => {
         "field": "phone"
     }, {
         "label": "Địa chỉ",
-        "icon": "address",
+        "icon": "home",
         "field": "address"
     }, {
         "label": "Tên đăng nhập",
@@ -66,8 +67,16 @@ const Register = () => {
     }
 
     const Register = async () => {
-        if(user.password !== user.confirm)
+        if(/\S+@\S+\.\S+/.test(user.email)===false){
+            setContentErr("Email không hợp lệ. Vui lòng kiểm tra lại!")
             setErr(true)
+        } else if (user.phone==="" || user.phone.length!==10 || user.phone[0]!=='0'){
+            setContentErr("Số điện thoại không đúng hoặc đã được sử dụng. Vui lòng kiểm tra lại!")
+            setErr(true)
+        } else if(user.password !== user.confirm) {
+            setContentErr("Mật khẩu không khớp. Vui lòng kiểm tra lại!")
+            setErr(true)
+        }
         else {
             setErr(false)
             setLoading(true)
@@ -110,9 +119,7 @@ const Register = () => {
 
                 {fields.map(f => <TextInput secureTextEntry={f.secureTextEntry} value={user[f.field]} onChangeText={t => change(f.field, t)} style={Style.margin} key={f.field} label={f.label} right={<TextInput.Icon icon={f.icon} />} />)}
 
-                <HelperText type="error" visible={err}>
-                    Mat khau khong khop
-                </HelperText>
+                <HelperText style={[Style.margin, {color:"red"}]} type="error" visible={err}>{contentErr}</HelperText>
 
                 <TouchableRipple style={Style.margin} onPress={picker}>
                     <Text>Chọn ảnh đại diện ...</Text>
