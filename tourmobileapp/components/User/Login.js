@@ -70,7 +70,7 @@ const Login = () => {
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
                 <Text style={Style.text}>Đăng nhập</Text>
                 <SelectDropdown data={['Khach', 'GGg', 'dsf']} />
-                {fields.map(f => <TextInput secureTextEntry={f.secureTextEntry} value={user[f.field]} onChangeText={t => change(f.field, t)} style={Style.margin} key={f.field} label={f.label} right={<TextInput.Icon icon={f.icon} />} />)}
+                {fields.map(f => <TextInput secureTextEntry={f.secureTextEntry} value={user[f.field]} onChangeText={t => change(f.field, t)} style={Style.margin} key={f.field} label={f.label} />)}
                 <HelperText style={[Style.margin, {color:"red"}]} visible={err} >Tên đăng nhập hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại</HelperText>
                 <Button style={Style.margin} icon="account" loading={loading} mode="contained" onPress={login}>ĐĂNG NHẬP</Button>
                 <Text style={Style.margin}>Bạn chưa có tài khoản? Nhấn đăng ký </Text>

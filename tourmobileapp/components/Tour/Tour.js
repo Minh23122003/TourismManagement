@@ -65,6 +65,16 @@ const Tour = ({route, navigation}) => {
         setPage(1);
         callback(value);
     }
+
+    const [refreshing, setRefreshing] = React.useState(false);
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => {
+            loadTours()
+            setRefreshing(false);
+        }, 1000);
+    }, []);
     
     return (
         <View style={[Style.margin, Style.container]}>
@@ -81,8 +91,7 @@ const Tour = ({route, navigation}) => {
                 <Searchbar style={Style.margin} placeholder="Nhập điểm đến" value={destination} onChangeText={t => search(t, setDestination)} />
             </View>
             <Text style={{fontSize:30, fontWeight:"bold"}}>Danh sách tour du lịch</Text>
-            <ScrollView onScroll={loadMore}>
-                <RefreshControl onRefresh={() => loadTours()} />
+            <ScrollView onScroll={loadMore} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} >
                 {loading && <ActivityIndicator />}
                 {tours.map(t => <TouchableOpacity key={t.id} onPress={() => navigation.navigate('TourDetails', {tourId : t.id})}>
                     <List.Item style={Style.margin} title={t.name} left={() => <Image style={Style.img} source={{uri : t.tour_image[0].image}} />} />

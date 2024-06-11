@@ -60,6 +60,16 @@ const News = ({route, navigation}) => {
         callback(value);
     }
 
+    const [refreshing, setRefreshing] = React.useState(false);
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => {
+            loadNews()
+            setRefreshing(false);
+        }, 1000);
+    }, []);
+
     return (
         <View style={[Style.container, Style.margin]}>
             <View style={Style.row}>
@@ -69,8 +79,7 @@ const News = ({route, navigation}) => {
                 </>}
             </View>
             <Text style={{fontSize:30, fontWeight:"bold"}}>Các tin tức mới</Text>
-            <ScrollView onScroll={loadMore}>
-                <RefreshControl onRefresh={() => loadTours()} />
+            <ScrollView onScroll={loadMore} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                 {loading && <ActivityIndicator />}
                 {news.map(n => <TouchableOpacity key={n.id} onPress={() => navigation.navigate('NewsDetails', {newsId : n.id})}>
                     <List.Item style={Style.margin} title={n.title} left={() => <Image style={Style.img} source={{uri : n.news_image[0].image}} />} />

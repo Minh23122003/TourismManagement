@@ -190,7 +190,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
                 setattr(user, k, v)
             user.save()
 
-        return Response(serializers.UserSerializer(user).data)
+        return Response(serializers.CustomerSerializer(user).data)
 
     @action(methods=['get'], url_path='get-booking', detail=False)
     def get_booking(self, request):

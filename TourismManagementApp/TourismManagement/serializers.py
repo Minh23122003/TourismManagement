@@ -101,12 +101,23 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = ['active']
 
 
-class UserSerializer(serializers.ModelSerializer):
+class CustomerSerializer(serializers.ModelSerializer):
     customer = serializers.SerializerMethodField()
 
     def get_customer(self, user):
         c = Customer.objects.get(user_id=user.id)
         return {'address': c.address, 'phone': c.phone}
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'avatar', 'email', 'is_superuser', 'is_staff'] + ['customer']
+        extra_kwargs = {
+            'password': {
+                'write_only': True
+            }
+        }
+
+class UserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep['avatar'] = instance.avatar.url
@@ -122,7 +133,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'avatar', 'email'] + ['customer']
+        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'avatar', 'email', 'is_superuser', 'is_staff']
         extra_kwargs = {
             'password': {
                 'write_only': True
