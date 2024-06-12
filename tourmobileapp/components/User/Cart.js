@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, ScrollView, Text, RefreshControl, View, Touch
 import { Button } from "react-native-paper"
 import APIs, { authApi, endpoints } from "../../configs/APIs"
 import Style from "./Style"
-import { MyUserContext } from "../../configs/Contexts"
+import { CartContext, CartDispatchContext, MyUserContext } from "../../configs/Contexts"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useNavigation } from "@react-navigation/native"
 
@@ -12,38 +12,39 @@ const Cart = ({navigation}) => {
     const [booking, setBooking] = React.useState(null)
     const [total, setTotal] = React.useState(0)
     const [quantityBooking, setQuantityBooking] = React.useState(0)
-    const [content, setContent] = React.useState("")
+    const cartDispatch = useContext(CartDispatchContext)
+    const cart = useContext(CartContext)
 
     const loadBooking = async () => {
         try {
             let token = await AsyncStorage.getItem('access-token')
             let res = await authApi(token).get(endpoints['booking'])
-            console.info(res.data)
-            if (res.status===204){
-                setBooking(null)
-                setContent(res.data.content)
-            }
-            else {
-                setBooking(res.data.results)
-                setTotal(res.data.total)
-                setContent(null)
-            }
+            console.info(res.data)    
+            setBooking(res.data.results)
+            setTotal(res.data.total)
             setQuantityBooking(res.data.results.length)
+            cartDispatch({
+                'type': "cart",
+                'payload': res.data.results.length
+            })
+            console.info(cart)
         } catch (ex) {
-            // console.error(ex)
+            console.error(ex)
         }
     }
 
     React.useEffect(() => {
         loadBooking()
-    }, [quantityBooking])
+    }, [quantityBooking, cart])
 
     const deleteBooking =async (id) => {     
             try {
                 let token = await AsyncStorage.getItem('access-token')
                 let res = authApi(token).delete(endpoints['deleteBooking'](id))   
-                setQuantityBooking(quantityBooking-1)
-                navigation.navigate('Cart')               
+                cartDispatch({
+                    'type': "delete"
+                })  
+                console.info(cart)         
             } catch (ex) {
                 console.error(ex)
             }
@@ -55,8 +56,10 @@ const Cart = ({navigation}) => {
                 "user_id": user.id,
                 "total": total
             })
-            setQuantityBooking(0)
-            navigation.navigate('Cart')
+            cartDispatch({
+                'type': "pay",
+            })
+            console.info(cart)
         } catch (ex) {
             console.error(ex)
         }
@@ -82,7 +85,7 @@ const Cart = ({navigation}) => {
 
     return (
         <ScrollView style={[Style.container, {}]} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} >
-            {content!==null?<Text style={Style.margin} >Bạn chưa đặt tour nào</Text>:<>
+            {booking===null||booking.length===0?<Text style={Style.margin} >Bạn chưa đặt tour nào</Text>:<>
                 {booking.map(b => <View key={b.id} style={[Style.container, Style.margin, Style.booking, Style.row, {width:400}]}>
                     <View style={[Style.margin, {flex:1}]}>
                         <Text>{b.tour_name}</Text>

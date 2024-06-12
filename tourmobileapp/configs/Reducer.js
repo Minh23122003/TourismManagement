@@ -7,3 +7,17 @@ export const MyUserReducer = (current, action) => {
     }
     return current;
 }
+
+export const CartReducer = (current, action) => {
+    switch (action.type) {
+        case "cart":
+            return action.payload;
+        case "pay":
+            return 0;
+        case "add":
+            return action.payload + 1;
+        case "delete":
+            return action.payload - 1;
+    }
+    return current;
+}

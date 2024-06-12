@@ -4,7 +4,7 @@ import APIs, { authApi, endpoints } from '../../configs/APIs';
 import Style from './Style';
 import moment from 'moment';
 import { Button, HelperText, TextInput } from 'react-native-paper';
-import { MyUserContext } from '../../configs/Contexts';
+import { CartDispatchContext, MyUserContext } from '../../configs/Contexts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Booking = ({ route, navigation }) => {
@@ -14,6 +14,7 @@ const Booking = ({ route, navigation }) => {
     const user = useContext(MyUserContext)
     const [ticketAdult, setTicketAdult] = React.useState(0)
     const [ticketChildren, setTicketChildren] = React.useState(0)
+    const cartDispatch = useContext(CartDispatchContext)
 
     const addBooking = async () => {
         if ((parseInt(ticketAdult) + parseInt(ticketChildren)) > tour.remain_ticket)
@@ -27,8 +28,12 @@ const Booking = ({ route, navigation }) => {
                 })
                 if (res.data.status===406)
                     Alert.alert('Lỗi', res.data.content, [{text:'Ok', onPress: () => navigation.navigate('Booking'), style:"default"}])
-                else
+                else{
+                    cartDispatch({
+                        'type': "add",
+                    })
                     Alert.alert('Thành công', 'Đặt vé thành công', [{text:'Ok', onPress: () => navigation.navigate('Tour'), style:"default"}])
+                }
             } catch (ex) {
                 console.error(ex)
             }

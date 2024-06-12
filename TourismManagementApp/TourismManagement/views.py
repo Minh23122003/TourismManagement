@@ -195,14 +195,14 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     @action(methods=['get'], url_path='get-booking', detail=False)
     def get_booking(self, request):
         booking = Booking.objects.filter(user=request.user, active=True).all()
-        if not booking:
-            return JsonResponse({'content': 'Ban chua dat tour nao!'}, status=status.HTTP_204_NO_CONTENT)
-        else:
-            total = 0
-            for b in booking:
-                tour = Tour.objects.get(id=b.tour_id)
-                total = total + int(tour.price_adult) * int(b.quantity_ticket_adult) + int(tour.price_children) * int(b.quantity_ticket_children)
-            return JsonResponse({'results': serializers.BookingSerializer(booking, many=True).data, 'total': total})
+        # if not booking:
+        #     return JsonResponse({'content': 'Ban chua dat tour nao!'})
+        # else:
+        total = 0
+        for b in booking:
+            tour = Tour.objects.get(id=b.tour_id)
+            total = total + int(tour.price_adult) * int(b.quantity_ticket_adult) + int(tour.price_children) * int(b.quantity_ticket_children)
+        return JsonResponse({'results': serializers.BookingSerializer(booking, many=True).data, 'total': total})
 
 
 
