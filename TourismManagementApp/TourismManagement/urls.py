@@ -17,5 +17,6 @@ r.register('comment-news', views.CommentNewsViewSet, basename='comment-news')
 
 
 urlpatterns = [
+    path('admin_tools_stats/', include('admin_tools_stats.urls')),
     path('', include(r.urls))
 ]
