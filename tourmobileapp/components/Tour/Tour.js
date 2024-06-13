@@ -71,6 +71,7 @@ const Tour = ({route, navigation}) => {
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
         setTimeout(() => {
+            setPage(1)
             loadTours()
             setRefreshing(false);
         }, 1000);

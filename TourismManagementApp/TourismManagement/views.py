@@ -7,7 +7,7 @@ from datetime import datetime
 from django.http import JsonResponse
 
 
-class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
+class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView, generics.DestroyAPIView):
 
     queryset = Tour.objects.filter(active=True)
     serializer_class = serializers.TourDetailsSerializer
@@ -104,7 +104,7 @@ class TourCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retri
     serializer_class = serializers.TourCategorySerializer
 
 
-class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
+class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView, generics.DestroyAPIView):
 
     queryset = News.objects.filter(active=True)
     serializer_class = serializers.NewsDetailsSerializer
@@ -172,7 +172,7 @@ class NewsCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retri
     serializer_class = serializers.NewsCategorySerializer
 
 
-class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
+class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
     queryset = User.objects.filter(is_active=True)
     serializer_class = serializers.UserSerializer
     parser_classes = [parsers.MultiPartParser, ]
@@ -190,20 +190,16 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
                 setattr(user, k, v)
             user.save()
 
-        return Response(serializers.CustomerSerializer(user).data)
+        return Response(serializers.UserSerializer(user).data)
 
     @action(methods=['get'], url_path='get-booking', detail=False)
     def get_booking(self, request):
         booking = Booking.objects.filter(user=request.user, active=True).all()
-        # if not booking:
-        #     return JsonResponse({'content': 'Ban chua dat tour nao!'})
-        # else:
         total = 0
         for b in booking:
             tour = Tour.objects.get(id=b.tour_id)
             total = total + int(tour.price_adult) * int(b.quantity_ticket_adult) + int(tour.price_children) * int(b.quantity_ticket_children)
         return JsonResponse({'results': serializers.BookingSerializer(booking, many=True).data, 'total': total})
-
 
 
 class BookingViewSet(viewsets.ViewSet, generics.DestroyAPIView):

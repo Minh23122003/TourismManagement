@@ -33,6 +33,6 @@ export default StyleSheet.create({
         justifyContent:"center", 
         flexDirection:"row", 
         backgroundColor:"lightblue", 
-        width:100
+        width:100,
     }
 })

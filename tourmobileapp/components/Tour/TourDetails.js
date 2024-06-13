@@ -148,7 +148,7 @@ const TourDetails = ({ route, navigation }) => {
                 <View>
                 {tour===null?<ActivityIndicator/>:<>
                     <Card key={tour.id}>
-                        <Card.Title titleStyle={Style.nameTour} title={tour.name} />
+                        <Card.Title titleStyle={[Style.nameTour, {display:"flex", flex:1}]} title={tour.name} />
                         <Card.Content>
                             <RenderHTML contentWidth={width} source={{html: tour.description}} />
                         </Card.Content>

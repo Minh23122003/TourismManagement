@@ -23,7 +23,7 @@ const News = ({route, navigation}) => {
                 else if ( page > 1)
                     setNews(current => {return [...current, ...res.data.results]})
                 if (res.data.next === null)
-                    setPage(-5)
+                    setPage(-99)
             } catch (ex) {
                 console.error(ex)
             } finally {
