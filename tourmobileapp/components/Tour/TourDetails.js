@@ -5,7 +5,7 @@ import Style from './Style';
 import { Button, Card, List, TextInput } from 'react-native-paper';
 import RenderHTML from 'react-native-render-html';
 import moment from 'moment';
-import { MyUserContext } from '../../configs/Contexts'
+import { MyUserContext, TourDispatchContext } from '../../configs/Contexts'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'moment/locale/vi'
 import { isCloseToBottom } from '../Utils/Utils';
@@ -23,6 +23,7 @@ const TourDetails = ({ route, navigation }) => {
     const [loading, setLoading] = React.useState(false)
     const [stars, setStars] = React.useState(0)
     const nav = useNavigation()
+    const tourDispatch = useContext(TourDispatchContext)
 
     const loadTour = async () => {
         try {
@@ -118,8 +119,24 @@ const TourDetails = ({ route, navigation }) => {
         }
     }
 
-    const confirmDelete = async (id) => {
+    const deleteTour = async () => {
+        try {
+            let res = await APIs.delete(endpoints['deleteTour'](tourId))
+            tourDispatch({
+                'type': "delete"
+            })
+            Alert.alert('Thành công', 'Xóa tour thành công', [{text:'Ok', onPress: () => nav.navigate('Tour'), style:"default"}])
+        } catch (ex){
+            console.error(ex)
+        }
+    }
+
+    const confirmDeleteComment = async (id) => {
         await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn xóa?', [{text:'Có', onPress: () => {deleteComment(id)}, style:"delete"}, {text:'Không'}])
+    } 
+
+    const confirmDeleteTour = async () => {
+        await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn xóa?', [{text:'Có', onPress: () => {deleteTour()}, style:"delete"}, {text:'Không'}])
     } 
 
     const addRating = async (number) => {
@@ -178,7 +195,7 @@ const TourDetails = ({ route, navigation }) => {
                 <TouchableOpacity style={Style.margin} >
                     <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Sửa tour du lịch</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={Style.margin} >
+                <TouchableOpacity style={Style.margin} onPress={() => confirmDeleteTour()} >
                     <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Xóa tour du lịch</Text>
                 </TouchableOpacity>
                 </View>
@@ -205,7 +222,7 @@ const TourDetails = ({ route, navigation }) => {
                         {user!==null && c.user.id===user.id?<>
                         <View>
                             <TouchableOpacity  style={Style.margin}><Text style={[Style.button, {padding:10}]}>Chỉnh sửa</Text></TouchableOpacity>
-                            <TouchableOpacity onPress={() => confirmDelete(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Xóa</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => confirmDeleteComment(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Xóa</Text></TouchableOpacity>
                         </View>
                         </>:<></>}
                     </View>)}               

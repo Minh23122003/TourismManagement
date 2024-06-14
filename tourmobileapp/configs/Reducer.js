@@ -21,3 +21,29 @@ export const CartReducer = (current, action) => {
     }
     return current;
 }
+
+export const TourReducer = (current, action) => {
+    switch (action.type) {
+        case "tour":
+            return action.payload;
+        case "add":
+            return action.payload + 1;
+        case "delete":
+            return action.payload - 1;
+    }
+    return current;
+}
+
+export const NewsReducer = (current, action) => {
+    switch (action.type) {
+        case "news":
+            return action.payload;
+        case "change":
+            return action.payload;
+        case "add":
+            return action.payload + 1;
+        case "delete":
+            return action.payload - 1;
+    }
+    return current;
+}

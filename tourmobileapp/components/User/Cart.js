@@ -11,7 +11,6 @@ const Cart = ({navigation}) => {
     const user = useContext(MyUserContext)
     const [booking, setBooking] = React.useState(null)
     const [total, setTotal] = React.useState(0)
-    const [quantityBooking, setQuantityBooking] = React.useState(0)
     const cartDispatch = useContext(CartDispatchContext)
     const cart = useContext(CartContext)
 
@@ -22,7 +21,6 @@ const Cart = ({navigation}) => {
             console.info(res.data)    
             setBooking(res.data.results)
             setTotal(res.data.total)
-            setQuantityBooking(res.data.results.length)
             cartDispatch({
                 'type': "cart",
                 'payload': res.data.results.length
@@ -35,7 +33,7 @@ const Cart = ({navigation}) => {
 
     React.useEffect(() => {
         loadBooking()
-    }, [quantityBooking, cart])
+    }, [cart])
 
     const deleteBooking =async (id) => {     
             try {

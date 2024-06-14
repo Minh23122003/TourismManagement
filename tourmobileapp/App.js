@@ -14,8 +14,8 @@ import Register from "./components/User/Register"
 import Profile from "./components/User/Profile"
 import Cart from "./components/User/Cart"
 import { Icon } from 'react-native-paper';
-import { CartContext, CartDispatchContext, MyDispatchContext, MyUserContext } from './configs/Contexts';
-import { CartReducer, MyUserReducer } from './configs/Reducer';
+import { CartContext, CartDispatchContext, MyDispatchContext, MyUserContext, NewsContext, NewsDispatchContext, TourContext, TourDispatchContext } from './configs/Contexts';
+import { CartReducer, MyUserReducer, NewsReducer, TourReducer } from './configs/Reducer';
 
 
 
@@ -71,6 +71,8 @@ const MyTab = () => {
 const App = () => {
   const [user, dispatch] = useReducer(MyUserReducer, null)
   const [cart, cartDispatch] = useReducer(CartReducer, 0)
+  const [tour, tourDispatch] = useReducer(TourReducer, 0)
+  const [news, newsDispatch] = useReducer(NewsReducer, 0)
 
   return (
     <NavigationContainer>
@@ -78,7 +80,15 @@ const App = () => {
         <MyDispatchContext.Provider value={dispatch}>
           <CartContext.Provider value={cart}>
             <CartDispatchContext.Provider value={cartDispatch}>
-              <MyTab />
+              <TourContext.Provider value={tour}>
+                <TourDispatchContext.Provider value={tourDispatch}>
+                  <NewsContext.Provider value={news}>
+                    <NewsDispatchContext.Provider value={newsDispatch}>
+                      <MyTab />
+                    </NewsDispatchContext.Provider>
+                  </NewsContext.Provider>
+                </TourDispatchContext.Provider>
+              </TourContext.Provider>
             </CartDispatchContext.Provider>
           </CartContext.Provider>
         </MyDispatchContext.Provider>

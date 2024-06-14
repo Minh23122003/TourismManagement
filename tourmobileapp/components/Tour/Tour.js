@@ -5,7 +5,7 @@ import { List, Chip, Searchbar } from "react-native-paper";
 import Style from "./Style";
 import TourDetails from "./TourDetails";
 import { isCloseToBottom } from "../Utils/Utils";
-import { MyUserContext } from "../../configs/Contexts";
+import { MyUserContext, TourContext, TourDispatchContext } from "../../configs/Contexts";
 
 
 const Tour = ({route, navigation}) => {
@@ -19,6 +19,8 @@ const Tour = ({route, navigation}) => {
     const [date, setDate] = React.useState("");
     const [destination, setDestination] = React.useState("");
     const user = useContext(MyUserContext)
+    const tourDispatch = useContext(TourDispatchContext)
+    const tour = useContext(TourContext)
     
     const loadTours = async () => {
         if (page > 0){
@@ -32,6 +34,11 @@ const Tour = ({route, navigation}) => {
                     setTours(current => {return [...current, ...res.data.results]})
                 if (res.data.next===null)
                     setPage(-99);
+                tourDispatch({
+                    'type': "tour",
+                    'payload': res.data.count
+                })
+                console.info(res.data.count)
             } catch (ex) {
                 console.error(ex);
             } finally {
@@ -51,7 +58,7 @@ const Tour = ({route, navigation}) => {
 
     React.useEffect(() => {
         loadTours();
-    }, [page, priceMin, priceMax, date, cateId, destination])
+    }, [page, priceMin, priceMax, date, cateId, destination, tour])
 
     React.useEffect(() => {
         loadCategories();
