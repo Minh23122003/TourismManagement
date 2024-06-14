@@ -148,7 +148,7 @@ const TourDetails = ({ route, navigation }) => {
                 <View>
                 {tour===null?<ActivityIndicator/>:<>
                     <Card key={tour.id}>
-                        <Card.Title titleStyle={[Style.nameTour, {display:"flex", flex:1}]} title={tour.name} />
+                        <Text style={[Style.nameTour, {marginLeft:15}]} >{tour.name}</Text>
                         <Card.Content>
                             <RenderHTML contentWidth={width} source={{html: tour.description}} />
                         </Card.Content>
@@ -173,7 +173,16 @@ const TourDetails = ({ route, navigation }) => {
                         </View> )}
                     </Card>
                 </>}
-
+                {user!==null && user.is_superuser===true?<>
+                <View style={[Style.container, Style.row, Style.margin]}>
+                <TouchableOpacity style={Style.margin} >
+                    <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Sửa tour du lịch</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={Style.margin} >
+                    <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Xóa tour du lịch</Text>
+                </TouchableOpacity>
+                </View>
+                </>:<></>}
                 <Text style={[Style.nameTour, Style.margin]}>Bình luận</Text>
                     <View style={[Style.row,{alignItems:"center", justifyContent:"center"}]}>
                             <TextInput value={content} onChangeText={t => setContent(t)} placeholder='Nội dung bình luận' style={Style.comment} />

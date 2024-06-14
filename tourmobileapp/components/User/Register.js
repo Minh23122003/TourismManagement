@@ -18,18 +18,18 @@ const Register = () => {
         "label": "Họ và tên lót",
         "icon": "text",
         "field": "last_name"
-    }, {
-        "label": "Email",
-        "icon": "email",
-        "field": "email"
-    }, {
-        "label": "Số điện thoại",
-        "icon": "phone",
-        "field": "phone"
-    }, {
-        "label": "Địa chỉ",
-        "icon": "home",
-        "field": "address"
+    // }, {
+    //     "label": "Email",
+    //     "icon": "email",
+    //     "field": "email"
+    // }, {
+    //     "label": "Số điện thoại",
+    //     "icon": "phone",
+    //     "field": "phone"
+    // }, {
+    //     "label": "Địa chỉ",
+    //     "icon": "home",
+    //     "field": "address"
     }, {
         "label": "Tên đăng nhập",
         "icon": "account",
@@ -67,13 +67,14 @@ const Register = () => {
     }
 
     const Register = async () => {
-        if(/\S+@\S+\.\S+/.test(user.email)===false){
-            setContentErr("Email không hợp lệ. Vui lòng kiểm tra lại!")
-            setErr(true)
-        } else if (user.phone==="" || user.phone.length!==10 || user.phone[0]!=='0'){
-            setContentErr("Số điện thoại không đúng hoặc đã được sử dụng. Vui lòng kiểm tra lại!")
-            setErr(true)
-        } else if(user.password !== user.confirm) {
+        // if(/\S+@\S+\.\S+/.test(user.email)===false){
+        //     setContentErr("Email không hợp lệ. Vui lòng kiểm tra lại!")
+        //     setErr(true)
+        // } else if (user.phone==="" || user.phone.length!==10 || user.phone[0]!=='0'){
+        //     setContentErr("Số điện thoại không đúng hoặc đã được sử dụng. Vui lòng kiểm tra lại!")
+        //     setErr(true)
+        // } else 
+        if(user.password !== user.confirm) {
             setContentErr("Mật khẩu không khớp. Vui lòng kiểm tra lại!")
             setErr(true)
         }
@@ -126,7 +127,7 @@ const Register = () => {
                 </TouchableRipple>
 
                 {user.avatar && <Image source={{uri: user.avatar.uri}} style={Style.avatar} />}
-                <Button icon="account" loading={loading} mode="contained" onPress={Register} >Dang ky</Button>
+                <Button icon="account" loading={loading} mode="contained" onPress={Register} >Đăng ký</Button>
             </ScrollView>
             </KeyboardAvoidingView>
         </View>

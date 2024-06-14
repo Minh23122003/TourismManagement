@@ -10,7 +10,6 @@ import TourDetails from './components/Tour/TourDetails';
 import News from "./components/News/News";
 import NewsDetails from "./components/News/NewsDetails";
 import Login from "./components/User/Login"
-import Logout from "./components/User/Logout"
 import Register from "./components/User/Register"
 import Profile from "./components/User/Profile"
 import Cart from "./components/User/Cart"

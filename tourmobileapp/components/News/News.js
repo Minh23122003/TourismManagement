@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { ActivityIndicator, RefreshControl, Text, View, TouchableOpacity, ScrollView, RefreshControlBase, Image } from "react-native"
 import APIs, { endpoints } from "../../configs/APIs";
 import { isCloseToBottom } from "../Utils/Utils";
 import Style from "./Style";
 import { Chip, List } from "react-native-paper";
+import { MyUserContext } from "../../configs/Contexts";
 
 const News = ({route, navigation}) => {
     const [news, setNews] = React.useState([])
@@ -11,6 +12,7 @@ const News = ({route, navigation}) => {
     const [categories, setCategories] = React.useState(null)
     const [cateId, setCateId] = React.useState("")
     const [page, setPage] = React.useState(1)
+    const user = useContext(MyUserContext)
 
     const loadNews = async () => {
         if(page > 0) {
@@ -78,6 +80,11 @@ const News = ({route, navigation}) => {
                     {categories.map(c => <Chip onPress={() => search(c.id, setCateId)} mode={cateId===c.id?"outlined":"flat"} key={c.id} style={Style.margin} icon="shape-outline">{c.name}</Chip>)}
                 </>}
             </View>
+            {user!==null && user.is_superuser===true?<>
+            <TouchableOpacity style={Style.margin} >
+                <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Tạo tin tức mới</Text>
+            </TouchableOpacity>
+            </>:<></>}
             <Text style={{fontSize:30, fontWeight:"bold"}}>Các tin tức mới</Text>
             <ScrollView onScroll={loadMore} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                 {loading && <ActivityIndicator />}

@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View, RefreshControl, ActivityIndicator } from "react-native"
 import APIs, { endpoints } from "../../configs/APIs";
 import { List, Chip, Searchbar } from "react-native-paper";
 import Style from "./Style";
 import TourDetails from "./TourDetails";
 import { isCloseToBottom } from "../Utils/Utils";
+import { MyUserContext } from "../../configs/Contexts";
 
 
 const Tour = ({route, navigation}) => {
@@ -17,6 +18,7 @@ const Tour = ({route, navigation}) => {
     const [priceMax, setPriceMax] = React.useState("");
     const [date, setDate] = React.useState("");
     const [destination, setDestination] = React.useState("");
+    const user = useContext(MyUserContext)
     
     const loadTours = async () => {
         if (page > 0){
@@ -91,6 +93,11 @@ const Tour = ({route, navigation}) => {
                 <Searchbar style={Style.margin} placeholder="Nhập ngày đi: dd-mm-yyyy" value={date} onChangeText={t => search(t, setDate)} />
                 <Searchbar style={Style.margin} placeholder="Nhập điểm đến" value={destination} onChangeText={t => search(t, setDestination)} />
             </View>
+            {user!==null && user.is_superuser===true?<>
+            <TouchableOpacity style={Style.margin} >
+                <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Tạo tour du lịch</Text>
+            </TouchableOpacity>
+            </>:<></>}
             <Text style={{fontSize:30, fontWeight:"bold"}}>Danh sách tour du lịch</Text>
             <ScrollView onScroll={loadMore} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} >
                 {loading && <ActivityIndicator />}

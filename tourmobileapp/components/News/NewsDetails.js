@@ -130,7 +130,7 @@ const NewsDetails = ({ route }) => {
             <ScrollView style={[Style.margin, Style.container]}>
                 {news===null?<ActivityIndicator/>:<>
                     <Card key={news.id} style={{alignItems:"center"}}>
-                        <Card.Title titleStyle={[Style.title, {display:"flex", flexWrap:"wrap"}]} title={news.title} />
+                        <Text style={[Style.title, {marginLeft:15}]}>{news.title}</Text>
                         <Card.Content>
                             <RenderHTML contentWidth={width} source={{html: news.content}} />
                         </Card.Content>
@@ -144,7 +144,16 @@ const NewsDetails = ({ route }) => {
                 </>}
 
                 <Chip onPress={() => addLike()} style={[Style.margin, {width:100, backgroundColor: like===true?"lightblue":"white"}]} icon="heart">Thich</Chip>
-
+                {user!==null && user.is_superuser===true?<>
+                <View style={[Style.container, Style.row, Style.margin]}>
+                <TouchableOpacity style={Style.margin} >
+                    <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Sửa tin tức</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={Style.margin} >
+                    <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Xóa tin tức</Text>
+                </TouchableOpacity>
+                </View>
+                </>:<></>}
                 <Text style={[Style.text, Style.margin]}>Bình luận</Text>
                 <View style={[Style.row,{alignItems:"center", justifyContent:"center"}]}>
                         <TextInput value={content} onChangeText={t => setContent(t)} placeholder='Nội dung bình luận' style={Style.comment} />
