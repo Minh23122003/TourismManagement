@@ -15,6 +15,7 @@ r.register('comment-tour', views.CommentTourViewSet, basename='comment-tour')
 r.register('comment-news', views.CommentNewsViewSet, basename='comment-news')
 r.register('customer', views.CustomerViewSet, basename='customer')
 r.register('tourimage', views.TourImageViewSet, basename='tourimage')
+r.register('newsimage', views.NewsImageViewSet, basename='newsimage')
 
 
 

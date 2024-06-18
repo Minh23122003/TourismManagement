@@ -18,6 +18,7 @@ import { CartContext, CartDispatchContext, MyDispatchContext, MyUserContext, New
 import { CartReducer, MyUserReducer, NewsReducer, TourReducer } from './configs/Reducer';
 import CreateTour from './components/Tour/CreateTour';
 import CreateNews from './components/News/CreateNews';
+import ChangeNews from './components/News/ChangeNews';
 
 
 
@@ -40,6 +41,7 @@ const NewsStack = () => {
       <Stack.Screen name="News" component={News} options={{title: "Tin tức du lịch"}} />
       <Stack.Screen name="NewsDetails" component={NewsDetails} options={{title: "Chi tiết tin tức"}} />
       <Stack.Screen name='CreateNews' component={CreateNews} options={{title: "Tạo tin tức mới"}} />
+      <Stack.Screen name='ChangeNews' component={ChangeNews} options={{title:"Sửa tin tức"}} />
     </Stack.Navigator>
   )
 }

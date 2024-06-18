@@ -167,9 +167,13 @@ class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
 
     @action(methods=['post'], url_path='post-news', detail=False)
     def post_news(self, request):
-        print(request.form)
+        n = News.objects.create(content=request.data.get('content'), title=request.data.get('title'), admin_id=request.data.get('admin_id'), news_category_id=request.data.get('cate_id'))
+        n.news_image.add(request.data.get('newsimage_id'))
+        n.save()
 
-        return status.HTTP_200_OK
+        return Response(serializers.NewsSerializer(n).data, status=status.HTTP_201_CREATED)
+
+
 
 
 
@@ -196,7 +200,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView
                 setattr(user, k, v)
             user.save()
 
-        return Response(serializers.UserSerializer(user).data)
+        return Response(serializers.UserInfoSerializer(user).data)
 
     @action(methods=['get'], url_path='get-booking', detail=False)
     def get_booking(self, request):
@@ -240,13 +244,17 @@ class CommentNewsViewSet(viewsets.ViewSet, generics.DestroyAPIView):
 class CustomerViewSet(viewsets.ViewSet):
     queryset = Customer.objects.all()
 
-    @action(methods=['post'], url_path='register', detail=False)
-    def Register(self, form):
-        r = form.data
-        user = User.objects.create(username=r['username'], password=r['password'], first_name=r['first_name'], last_name=r['last_name'], avatar=r['avatar'])
-        return Response(serializers.UserSerializer(user).data)
+    @action(methods=['post'], url_path='post-customer', detail=False)
+    def post_customer(self, request):
+        c = Customer.objects.create(phone=request.data.get('phone'), address=request.data.get('address'), user_id=request.data.get('user_id'))
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
     queryset = TourImage.objects.all()
     serializer_class = serializers.TourImageSerializer
+
+
+class NewsImageViewSet(viewsets.ViewSet, generics.CreateAPIView):
+    queryset = NewsImage.objects.all()
+    serializer_class = serializers.NewsImageSerializer

@@ -32,7 +32,9 @@ export const endpoints = {
     'pay': '/booking/pay/',
     'deleteTour': (tourId) => `/tours/${tourId}/`,
     'deleteNews': (newsId) => `/news/${newsId}/`,
-    'test': '/tourimage/'
+    'customer': '/customer/post-customer/',
+    'addNewsImage':'/newsimage/',
+    'addNews':'/news/post-news/',
 }
 
 export const authApi = (token) => {

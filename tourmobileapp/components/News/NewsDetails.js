@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'moment/locale/vi'
 import { useNavigation } from "@react-navigation/native"
 
-const NewsDetails = ({ route }) => {
+const NewsDetails = ({ navigation, route }) => {
     const newsId = route.params?.newsId
     const [news, setNews] = React.useState(null)
     const { width } = useWindowDimensions();
@@ -146,7 +146,7 @@ const NewsDetails = ({ route }) => {
     return (
             <ScrollView style={[Style.margin, Style.container]}>
                 {news===null?<ActivityIndicator/>:<>
-                    <Card key={news.id} style={{alignItems:"center"}}>
+                    <Card key={news.id} style={Style.margin}>
                         <Text style={[Style.title, {marginLeft:15}]}>{news.title}</Text>
                         <Card.Content>
                             <RenderHTML contentWidth={width} source={{html: news.content}} />
@@ -163,7 +163,7 @@ const NewsDetails = ({ route }) => {
                 <Chip onPress={() => addLike()} style={[Style.margin, {width:100, backgroundColor: like===true?"lightblue":"white"}]} icon="heart">Thich</Chip>
                 {user!==null && user.is_superuser===true?<>
                 <View style={[Style.container, Style.row, Style.margin]}>
-                <TouchableOpacity style={Style.margin} >
+                <TouchableOpacity style={Style.margin} onPress={() => navigation.navigate('ChangeNews', {news:news})} >
                     <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Sửa tin tức</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={Style.margin} onPress={() => confirmDeleteNews()} >

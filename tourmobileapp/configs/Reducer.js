@@ -42,6 +42,8 @@ export const NewsReducer = (current, action) => {
             return action.payload + 1;
         case "delete":
             return action.payload - 1;
+        case "change":
+            return action.payload;
     }
     return current;
 }

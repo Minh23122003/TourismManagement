@@ -18,18 +18,18 @@ const Register = () => {
         "label": "Họ và tên lót",
         "icon": "text",
         "field": "last_name"
-    // }, {
-    //     "label": "Email",
-    //     "icon": "email",
-    //     "field": "email"
-    // }, {
-    //     "label": "Số điện thoại",
-    //     "icon": "phone",
-    //     "field": "phone"
-    // }, {
-    //     "label": "Địa chỉ",
-    //     "icon": "home",
-    //     "field": "address"
+    }, {
+        "label": "Email",
+        "icon": "email",
+        "field": "email"
+    }, {
+        "label": "Số điện thoại",
+        "icon": "phone",
+        "field": "phone"
+    }, {
+        "label": "Địa chỉ",
+        "icon": "home",
+        "field": "address"
     }, {
         "label": "Tên đăng nhập",
         "icon": "account",
@@ -67,13 +67,13 @@ const Register = () => {
     }
 
     const Register = async () => {
-        // if(/\S+@\S+\.\S+/.test(user.email)===false){
-        //     setContentErr("Email không hợp lệ. Vui lòng kiểm tra lại!")
-        //     setErr(true)
-        // } else if (user.phone==="" || user.phone.length!==10 || user.phone[0]!=='0'){
-        //     setContentErr("Số điện thoại không đúng hoặc đã được sử dụng. Vui lòng kiểm tra lại!")
-        //     setErr(true)
-        // } else 
+        if(/\S+@\S+\.\S+/.test(user.email)===false){
+            setContentErr("Email không hợp lệ. Vui lòng kiểm tra lại!")
+            setErr(true)
+        } else if (user.phone==="" || user.phone.length!==10 || user.phone[0]!=='0'){
+            setContentErr("Số điện thoại không đúng hoặc đã được sử dụng. Vui lòng kiểm tra lại!")
+            setErr(true)
+        } else 
         if(user.password !== user.confirm) {
             setContentErr("Mật khẩu không khớp. Vui lòng kiểm tra lại!")
             setErr(true)
@@ -82,12 +82,12 @@ const Register = () => {
             setErr(false)
             setLoading(true)
             let uriArray = user.avatar.uri.split(".");
-            let fileExtension = uriArray[uriArray.length - 1];  // e.g.: "jpg"
-            let fileTypeExtended = `${user.avatar.type}/${fileExtension}`; // e.g.: "image/jpg"
+            let fileExtension = uriArray[uriArray.length - 1];
+            let fileTypeExtended = `${user.avatar.type}/${fileExtension}`;
             try {
                 let form = new FormData()
                 for (let f in user)
-                    if(f !== 'confirm')
+                    if(f !== 'confirm' && f !== 'address' && f !== 'phone')
                         if(f==='avatar')
                             form.append(f, {
                                 uri: user.avatar.uri,
@@ -107,11 +107,20 @@ const Register = () => {
                         'Content-Type': 'multipart/form-data'
                     }
                 })
-                if(res.status===201)
-                    nav.navigate('Login')
+                if(res.status===201){
+                    let res1 = await APIs.post(endpoints['customer'], {
+                        'phone': user.phone,
+                        'address': user.address,
+                        'user_id': res.data.id
+                    })
+                    if (res1.status===201)
+                        nav.navigate('Login')
+                }
             }catch (ex) {
-                console.error(ex)
+                // console.error(ex)
             } finally{
+                setContentErr("Tên đăng nhập đã tồn tại. Vui lòng nhập tên đăng nhập khác!")
+                setErr(true)
                 setLoading(false)
             }
         }
