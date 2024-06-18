@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // const BASE_URL = 'https://minhdong.pythonanywhere.com/'
-const BASE_URL = 'http://192.168.1.4:8000/'
+const BASE_URL = 'http://192.168.1.5:8000/'
+// const BASE_URL = 'http://192.168.204.211:8000/'
 
 export const endpoints = {
     'cateTours': '/tours-category/',
@@ -29,7 +30,9 @@ export const endpoints = {
     'deleteBooking': (id) => `/booking/${id}/`,
     'booking': '/user/get-booking/',
     'pay': '/booking/pay/',
-    'deleteTour': (tourId) => `/tours/${tourId}/`
+    'deleteTour': (tourId) => `/tours/${tourId}/`,
+    'deleteNews': (newsId) => `/news/${newsId}/`,
+    'test': '/tourimage/'
 }
 
 export const authApi = (token) => {

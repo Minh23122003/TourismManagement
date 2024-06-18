@@ -16,6 +16,8 @@ import Cart from "./components/User/Cart"
 import { Icon } from 'react-native-paper';
 import { CartContext, CartDispatchContext, MyDispatchContext, MyUserContext, NewsContext, NewsDispatchContext, TourContext, TourDispatchContext } from './configs/Contexts';
 import { CartReducer, MyUserReducer, NewsReducer, TourReducer } from './configs/Reducer';
+import CreateTour from './components/Tour/CreateTour';
+import CreateNews from './components/News/CreateNews';
 
 
 
@@ -27,6 +29,7 @@ const TourStack = () => {
       <Stack.Screen name="Tour" component={Tour} options={{title:"Tour du lịch"}} />
       <Stack.Screen name="TourDetails" component={TourDetails} options={{title:"Chi tiết tour du lịch"}} />
       <Stack.Screen name="Booking" component={Booking} options={{title:"Đặt tour"}} />
+      <Stack.Screen name="CreateTour" component={CreateTour} options={{title:"Tạo tour du lịch"}} />
     </Stack.Navigator>
   )
 }
@@ -36,6 +39,7 @@ const NewsStack = () => {
     <Stack.Navigator>
       <Stack.Screen name="News" component={News} options={{title: "Tin tức du lịch"}} />
       <Stack.Screen name="NewsDetails" component={NewsDetails} options={{title: "Chi tiết tin tức"}} />
+      <Stack.Screen name='CreateNews' component={CreateNews} options={{title: "Tạo tin tức mới"}} />
     </Stack.Navigator>
   )
 }
@@ -73,6 +77,7 @@ const App = () => {
   const [cart, cartDispatch] = useReducer(CartReducer, 0)
   const [tour, tourDispatch] = useReducer(TourReducer, 0)
   const [news, newsDispatch] = useReducer(NewsReducer, 0)
+
 
   return (
     <NavigationContainer>

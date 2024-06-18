@@ -119,24 +119,8 @@ const TourDetails = ({ route, navigation }) => {
         }
     }
 
-    const deleteTour = async () => {
-        try {
-            let res = await APIs.delete(endpoints['deleteTour'](tourId))
-            tourDispatch({
-                'type': "delete"
-            })
-            Alert.alert('Thành công', 'Xóa tour thành công', [{text:'Ok', onPress: () => nav.navigate('Tour'), style:"default"}])
-        } catch (ex){
-            console.error(ex)
-        }
-    }
-
     const confirmDeleteComment = async (id) => {
         await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn xóa?', [{text:'Có', onPress: () => {deleteComment(id)}, style:"delete"}, {text:'Không'}])
-    } 
-
-    const confirmDeleteTour = async () => {
-        await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn xóa?', [{text:'Có', onPress: () => {deleteTour()}, style:"delete"}, {text:'Không'}])
     } 
 
     const addRating = async (number) => {
@@ -153,6 +137,22 @@ const TourDetails = ({ route, navigation }) => {
             }
         }
     }
+
+    const deleteTour = async () => {
+        try {
+            let res = await APIs.delete(endpoints['deleteTour'](tourId))
+            tourDispatch({
+                'type': "delete",
+            })
+            Alert.alert('Thành công', 'Xóa tour thành công', [{text:'Ok', onPress: () => nav.navigate('Tour'), style:"default"}])
+        } catch (ex){
+            console.error(ex)
+        }
+    }
+
+    const confirmDeleteTour = async () => {
+        await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn xóa?', [{text:'Có', onPress: () => {deleteTour()}, style:"delete"}, {text:'Không'}])
+    } 
 
     const loadMore = ({nativeEvent}) => {
         if (loading===false && isCloseToBottom(nativeEvent)){

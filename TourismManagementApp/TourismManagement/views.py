@@ -9,7 +9,7 @@ from django.http import JsonResponse
 
 class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView, generics.DestroyAPIView):
 
-    queryset = Tour.objects.filter(active=True)
+    queryset = Tour.objects.filter(active=True).order_by('-id')
     serializer_class = serializers.TourDetailsSerializer
     pagination_class = paginators.TourPaginator
 
@@ -29,23 +29,23 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
         if self.action.__eq__('list'):
             price_min = self.request.query_params.get('price_min')
             if price_min:
-                queries = queries.filter(price_adult__gte=int(price_min))
+                queries = queries.filter(price_adult__gte=int(price_min)).order_by('-id')
             price_max = self.request.query_params.get('price_max')
             if price_max:
-                queries = queries.filter(price_adult__lte=int(price_max))
+                queries = queries.filter(price_adult__lte=int(price_max)).order_by('-id')
             start_date = self.request.query_params.get('start_date')
             try:
                 if start_date:
-                    queries = queries.filter(start_date__gt=datetime.strptime(start_date, '%d-%m-%Y'))
+                    queries = queries.filter(start_date__gt=datetime.strptime(start_date, '%d-%m-%Y')).order_by('-id')
             except:
                 queries = queries
             destination = self.request.query_params.get('destination')
             destination = Destination.objects.filter(location__icontains=destination)
             if destination:
-                queries = queries.filter(destination__in=destination).distinct()
+                queries = queries.filter(destination__in=destination).distinct().order_by('-id')
             cate_id = self.request.query_params.get('cate_id')
             if cate_id:
-                queries = queries.filter(tour_category_id=cate_id)
+                queries = queries.filter(tour_category_id=cate_id).order_by('-id')
         return queries
 
     @action(methods=['post'], url_path='post-comment', detail=True)
@@ -106,7 +106,7 @@ class TourCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retri
 
 class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView, generics.DestroyAPIView):
 
-    queryset = News.objects.filter(active=True)
+    queryset = News.objects.filter(active=True).order_by('-id')
     serializer_class = serializers.NewsDetailsSerializer
     pagination_class = paginators.NewsPaginator
 
@@ -115,7 +115,7 @@ class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
         if self.action.__eq__('list'):
             cate_id = self.request.query_params.get('cate_id')
             if cate_id:
-                queries = queries.filter(news_category_id=cate_id)
+                queries = queries.filter(news_category_id=cate_id).order_by('-id')
         return queries
 
     def get_permissions(self):
@@ -164,6 +164,12 @@ class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
             like.save()
 
         return Response(serializers.LikeSerializer(like).data)
+
+    @action(methods=['post'], url_path='post-news', detail=False)
+    def post_news(self, request):
+        print(request.form)
+
+        return status.HTTP_200_OK
 
 
 
@@ -229,3 +235,18 @@ class CommentTourViewSet(viewsets.ViewSet, generics.DestroyAPIView):
 
 class CommentNewsViewSet(viewsets.ViewSet, generics.DestroyAPIView):
     queryset = CommentNews.objects.all()
+
+
+class CustomerViewSet(viewsets.ViewSet):
+    queryset = Customer.objects.all()
+
+    @action(methods=['post'], url_path='register', detail=False)
+    def Register(self, form):
+        r = form.data
+        user = User.objects.create(username=r['username'], password=r['password'], first_name=r['first_name'], last_name=r['last_name'], avatar=r['avatar'])
+        return Response(serializers.UserSerializer(user).data)
+
+
+class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
+    queryset = TourImage.objects.all()
+    serializer_class = serializers.TourImageSerializer

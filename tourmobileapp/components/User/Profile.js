@@ -17,8 +17,8 @@ const Profile = () => {
             <Text style={Style.text} >Thông tin người dùng</Text>
             <Text style={Style.text} >Chào {user.first_name} {user.last_name}</Text>
             <Text style={Style.text} >Email: {user.email}</Text>
-            <Text style={Style.text} >Địa chỉ: {user.info.address}</Text>
-            <Text style={Style.text} >Số điện thoại: {user.info.phone}</Text>
+            {/* <Text style={Style.text} >Địa chỉ: {user.info.address}</Text>
+            <Text style={Style.text} >Số điện thoại: {user.info.phone}</Text> */}
             <Image source={{uri:user.avatar}} style={Style.avatar} />
             <Button icon="logout" onPress={() => confirmLogout()}>ĐĂNG XUẤT</Button>
         </View>

@@ -37,8 +37,8 @@ const Login = () => {
         try {
             let res = await APIs.post(endpoints['login'], {
                 ...user,
-                "client_id": "vQ5UUjIzqg3ineVTIqb0WdIfinhKJRDGqeuqvSPn",
-                "client_secret": "ZaljW7t1dekYn4ZULoAQboGQKNlZ04mrPQvDkrsmwkMZW39U2di2F8t8t7ttmhzCjONra9WbHTvhcHgd6ToxhqDbvUfagMkbfwM1DRcarzQoe1Xy0eqakdW6wYhausH6",
+                "client_id": "bcJtRPi5CeRpfBgt3LDltKylTiKaZl3dcbFQN8lk",
+                "client_secret": "hEVULYvn2H9GEbW34WEiybQVioclW53I5bD8eEdlBBIlsDJmt5GkhIxF3KM5OMpfcMEpQbmhv1fBccQmn4OPZptursM5rZeojSUvZNdx3TS1NKhGhhj9gbgeAqu8lrVY",
                 "grant_type": "password"
             })
             console.info(res.data)

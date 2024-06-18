@@ -6,7 +6,7 @@ import { Card, Chip, TextInput } from "react-native-paper"
 import RenderHTML from "react-native-render-html"
 import { isCloseToBottom } from "../Utils/Utils"
 import moment from 'moment';
-import { MyUserContext } from '../../configs/Contexts'
+import { MyUserContext, NewsDispatchContext } from '../../configs/Contexts'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'moment/locale/vi'
 import { useNavigation } from "@react-navigation/native"
@@ -22,6 +22,7 @@ const NewsDetails = ({ route }) => {
     const [loading, setLoading] = React.useState(false)
     const [like, setLike] = React.useState(false)
     const nav = useNavigation()
+    const newsDispatch = useContext(NewsDispatchContext)
 
     const loadNews = async () => {
         try {
@@ -102,9 +103,9 @@ const NewsDetails = ({ route }) => {
         }
     }
 
-    const confirmDelete = async (id) => {
+    const confirmDeleteComment = async (id) => {
         await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn xóa?', [{text:'Có', onPress: () => {deleteComment(id)}, style:"delete"}, {text:'Không'}])
-    } 
+    }
 
     const addLike = async () => {
         if(user===null)
@@ -119,6 +120,22 @@ const NewsDetails = ({ route }) => {
             }
         }
     }
+
+    const deleteNews = async () => {
+        try {
+            let res = await APIs.delete(endpoints['deleteNews'](newsId))
+            newsDispatch({
+                'type': "delete",
+            })
+            Alert.alert('Thành công', 'Xóa tin thành công', [{text:'Ok', onPress: () => nav.navigate('News'), style:"default"}])
+        } catch (ex){
+            console.error(ex)
+        }
+    }
+
+    const confirmDeleteNews = async () => {
+        await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn xóa?', [{text:'Có', onPress: () => {deleteNews()}, style:"delete"}, {text:'Không'}])
+    } 
 
     const loadMore = ({nativeEvent}) => {
         if (loading===false && isCloseToBottom(nativeEvent)){
@@ -149,7 +166,7 @@ const NewsDetails = ({ route }) => {
                 <TouchableOpacity style={Style.margin} >
                     <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Sửa tin tức</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={Style.margin} >
+                <TouchableOpacity style={Style.margin} onPress={() => confirmDeleteNews()} >
                     <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Xóa tin tức</Text>
                 </TouchableOpacity>
                 </View>
@@ -173,7 +190,7 @@ const NewsDetails = ({ route }) => {
                         {user !== null && c.user.id===user.id?<>
                         <View>
                             <TouchableOpacity  style={Style.margin}><Text style={[Style.button, {padding:10}]}>Chỉnh sửa</Text></TouchableOpacity>
-                            <TouchableOpacity onPress={() => confirmDelete(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Xóa</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => confirmDeleteComment(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Xóa</Text></TouchableOpacity>
                         </View>
                         </>:<></>}
                     </View>)}               

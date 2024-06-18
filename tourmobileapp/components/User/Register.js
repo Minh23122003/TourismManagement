@@ -81,6 +81,9 @@ const Register = () => {
         else {
             setErr(false)
             setLoading(true)
+            let uriArray = user.avatar.uri.split(".");
+            let fileExtension = uriArray[uriArray.length - 1];  // e.g.: "jpg"
+            let fileTypeExtended = `${user.avatar.type}/${fileExtension}`; // e.g.: "image/jpg"
             try {
                 let form = new FormData()
                 for (let f in user)
@@ -89,11 +92,14 @@ const Register = () => {
                             form.append(f, {
                                 uri: user.avatar.uri,
                                 name: user.avatar.fileName,
-                                type: user.avatar.type
+                                type: fileTypeExtended
                             })
                         else
                             form.append(f, user[f])
                 console.info(form)
+                console.info(user.avatar.uri)
+                console.info(user.avatar.fileName)
+                console.info(user.avatar.type)
                 
                 
                 let res = await APIs.post(endpoints['register'], form, {

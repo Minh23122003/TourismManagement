@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-vv4q=37mn6$60$%lo#12rq)v@c0o7_6bo2yg^0*lmn1e4-w&3f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.4', 'localhost', '127.0.0.1', '10.17.64.187']
+ALLOWED_HOSTS = ['192.168.1.5', '10.17.39.95', '127.0.0.1']
 
 import pymysql
 

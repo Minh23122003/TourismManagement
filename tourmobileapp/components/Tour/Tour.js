@@ -36,9 +36,9 @@ const Tour = ({route, navigation}) => {
                     setPage(-99);
                 tourDispatch({
                     'type': "tour",
-                    'payload': res.data.count
+                    'payload': parseInt(res.data.count)
                 })
-                console.info(res.data.count)
+                console.info(tour)
             } catch (ex) {
                 console.error(ex);
             } finally {
@@ -80,8 +80,8 @@ const Tour = ({route, navigation}) => {
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
         setTimeout(() => {
-            setPage(1)
             loadTours()
+            setPage(1)
             setRefreshing(false);
         }, 1000);
     }, []);
@@ -101,7 +101,7 @@ const Tour = ({route, navigation}) => {
                 <Searchbar style={Style.margin} placeholder="Nhập điểm đến" value={destination} onChangeText={t => search(t, setDestination)} />
             </View>
             {user!==null && user.is_superuser===true?<>
-            <TouchableOpacity style={Style.margin} >
+            <TouchableOpacity style={Style.margin} onPress={() => navigation.navigate('CreateTour')} >
                 <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Tạo tour du lịch</Text>
             </TouchableOpacity>
             </>:<></>}

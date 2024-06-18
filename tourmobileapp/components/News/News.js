@@ -4,7 +4,8 @@ import APIs, { endpoints } from "../../configs/APIs";
 import { isCloseToBottom } from "../Utils/Utils";
 import Style from "./Style";
 import { Chip, List } from "react-native-paper";
-import { MyUserContext } from "../../configs/Contexts";
+import { MyUserContext, NewsContext, NewsDispatchContext } from "../../configs/Contexts";
+import { useNavigation } from "@react-navigation/native";
 
 const News = ({route, navigation}) => {
     const [news, setNews] = React.useState([])
@@ -13,6 +14,9 @@ const News = ({route, navigation}) => {
     const [cateId, setCateId] = React.useState("")
     const [page, setPage] = React.useState(1)
     const user = useContext(MyUserContext)
+    const newss = useContext(NewsContext)
+    const newsDispatch = useContext(NewsDispatchContext)
+    const nav = useNavigation()
 
     const loadNews = async () => {
         if(page > 0) {
@@ -26,6 +30,11 @@ const News = ({route, navigation}) => {
                     setNews(current => {return [...current, ...res.data.results]})
                 if (res.data.next === null)
                     setPage(-99)
+                newsDispatch({
+                    'type': "news",
+                    'payload': parseInt(res.data.count)
+                })
+                console.info(newss)
             } catch (ex) {
                 console.error(ex)
             } finally {
@@ -44,8 +53,8 @@ const News = ({route, navigation}) => {
     }
 
     React.useEffect(() => {
-        loadNews()
-    }, [cateId, page])
+        loadNews();
+    }, [cateId, page, newss])
 
     React.useEffect(() => {
         loadCategories()
@@ -68,6 +77,7 @@ const News = ({route, navigation}) => {
         setRefreshing(true);
         setTimeout(() => {
             loadNews()
+            setPage(1)
             setRefreshing(false);
         }, 1000);
     }, []);
@@ -81,7 +91,7 @@ const News = ({route, navigation}) => {
                 </>}
             </View>
             {user!==null && user.is_superuser===true?<>
-            <TouchableOpacity style={Style.margin} >
+            <TouchableOpacity style={Style.margin} onPress={() => nav.navigate("CreateNews")} >
                 <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Tạo tin tức mới</Text>
             </TouchableOpacity>
             </>:<></>}

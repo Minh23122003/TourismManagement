@@ -103,18 +103,18 @@ class LikeSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    info = serializers.SerializerMethodField()
-
-    def get_info(self, user):
-        if user.is_superuser == True:
-            c = Admin.objects.get(user_id=user.id)
-            return {'address': c.address, 'phone': c.phone}
-        elif user.is_staff == True:
-            c = Staff.objects.get(user_id=user.id)
-            return {'address': c.address, 'phone': c.phone}
-        else:
-            c = Customer.objects.get(user_id=user.id)
-            return {'address': c.address, 'phone': c.phone}
+    # info = serializers.SerializerMethodField()
+    #
+    # def get_info(self, user):
+    #     if user.is_superuser == True:
+    #         c = Admin.objects.get(user_id=user.id)
+    #         return {'address': c.address, 'phone': c.phone}
+    #     elif user.is_staff == True:
+    #         c = Staff.objects.get(user_id=user.id)
+    #         return {'address': c.address, 'phone': c.phone}
+    #     else:
+    #         c = Customer.objects.get(user_id=user.id)
+    #         return {'address': c.address, 'phone': c.phone}
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
@@ -131,7 +131,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'avatar', 'email', 'is_superuser', 'is_staff'] + ['info']
+        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'avatar', 'email', 'is_superuser', 'is_staff']
         extra_kwargs = {
             'password': {
                 'write_only': True
