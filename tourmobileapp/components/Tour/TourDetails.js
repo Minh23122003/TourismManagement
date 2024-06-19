@@ -24,6 +24,7 @@ const TourDetails = ({ route, navigation }) => {
     const [stars, setStars] = React.useState(0)
     const nav = useNavigation()
     const tourDispatch = useContext(TourDispatchContext)
+    const [change, setChange] =React.useState("")
 
     const loadTour = async () => {
         try {
@@ -96,19 +97,19 @@ const TourDetails = ({ route, navigation }) => {
         }
     }
 
-    // const patchComment = async (id) => {
-    //     try {
-    //         let token = await AsyncStorage.getItem('access-token')
-    //         let res = await authApi(token).post(endpoints['addCommentTour'](tourId), {
-    //             'content': content
-    //         })
-    //         setPage(1)
-    //     } catch (ex) {
-    //         console.error(ex)
-    //     } finally {
-    //         loadComment()
-    //     }
-    // }
+    const patchComment = async (id) => {
+        try {
+            let res = await APIs.put(endpoints['patchCommentTour'], {
+                'content': change,
+                'id':id
+            })
+            setPage(1)
+            setChange("")
+        } catch (ex) {
+            console.error(ex)
+        } finally {
+        }
+    }
 
     const deleteComment = async (id) => {
         try {
@@ -192,7 +193,7 @@ const TourDetails = ({ route, navigation }) => {
                 </>}
                 {user!==null && user.is_superuser===true?<>
                 <View style={[Style.container, Style.row, Style.margin]}>
-                <TouchableOpacity style={Style.margin} >
+                <TouchableOpacity style={Style.margin} onPress={()=>navigation.navigate('ChangTour', {tour:tour})} >
                     <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Sửa tour du lịch</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={Style.margin} onPress={() => confirmDeleteTour()} >
@@ -221,9 +222,10 @@ const TourDetails = ({ route, navigation }) => {
                         </View>
                         {user!==null && c.user.id===user.id?<>
                         <View>
-                            <TouchableOpacity  style={Style.margin}><Text style={[Style.button, {padding:10}]}>Chỉnh sửa</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => patchComment(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Chỉnh sửa</Text></TouchableOpacity>
                             <TouchableOpacity onPress={() => confirmDeleteComment(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Xóa</Text></TouchableOpacity>
                         </View>
+                        <TextInput value={change} onChangeText={t => setChange(t)} placeholder='Nội dung bình luận sửa' style={Style.comment} />
                         </>:<></>}
                     </View>)}               
                 </>}

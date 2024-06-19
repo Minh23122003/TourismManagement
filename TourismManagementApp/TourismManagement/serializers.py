@@ -25,7 +25,7 @@ class RatingSerializer(serializers.ModelSerializer):
 class TourSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tour
-        fields = ['id', 'name', 'start_date', 'end_date', 'description', 'price_adult', 'price_children', 'tour_category_id']
+        fields = ['id', 'name', 'start_date', 'end_date', 'description', 'price_adult', 'price_children', 'tour_category_id', 'quantity_ticket']
 
 
 class TourImageSerializer(ItemSerializer):

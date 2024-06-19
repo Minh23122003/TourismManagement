@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .models import *
 from datetime import datetime
 from django.http import JsonResponse
+import datetime
 
 
 class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView, generics.DestroyAPIView):
@@ -36,7 +37,7 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
             start_date = self.request.query_params.get('start_date')
             try:
                 if start_date:
-                    queries = queries.filter(start_date__gt=datetime.strptime(start_date, '%d-%m-%Y')).order_by('-id')
+                    queries = queries.filter(start_date__gt=datetime.datetime.strptime(start_date, '%d-%m-%Y')).order_by('-id')
             except:
                 queries = queries
             destination = self.request.query_params.get('destination')
@@ -97,6 +98,35 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
         if not created:
             return JsonResponse({'content': 'Ban da dat ve cho tour nay roi. Vui long huy ve de dat lai!', 'status': 406})
         return Response(serializers.BookingSerializer(booking).data, status=status.HTTP_200_OK)
+
+
+    @action(methods=['post'], url_path='post-tour', detail=False)
+    def post_tour(self, request):
+        t = Tour.objects.create(name=request.data.get('name'), description=request.data.get('description'),
+                        price_adult=request.data.get('adult'), price_children=request.data.get('children'),
+                        quantity_ticket=request.data.get('quantity'), tour_category_id=request.data.get('cate_id'),
+                                start_date=datetime.datetime.strptime(request.data.get('start_date'), '%d/%m/%Y'),
+                                end_date=datetime.datetime.strptime(request.data.get('end_date'), '%d/%m/%Y'))
+        t.tour_image.add(request.data.get('image_id'))
+        t.save()
+        d = Destination.objects.create(name=request.data.get('desName'), location=request.data.get('desLocation'))
+        t.destination.add(d)
+        t.save()
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+    @action(methods=['put'], url_path='put-tour', detail=False)
+    def put_tour(self, request):
+        t = Tour.objects.filter(id=request.data.get('id'))
+        t.update(name=request.data.get('name'), description=request.data.get('description'),
+                                price_adult=request.data.get('adult'), price_children=request.data.get('children'),
+                                quantity_ticket=request.data.get('quantity'),
+                                tour_category_id=request.data.get('cate_id'),
+                                start_date=datetime.datetime.strptime(request.data.get('start_date'), '%d/%m/%Y'),
+                                end_date=datetime.datetime.strptime(request.data.get('end_date'), '%d/%m/%Y'))
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class TourCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
@@ -174,7 +204,16 @@ class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
         return Response(serializers.NewsSerializer(n).data, status=status.HTTP_201_CREATED)
 
 
+    @action(methods=['put'], url_path='put-news', detail=False)
+    def put_news(self, request):
+        n = News.objects.filter(id=request.data.get('id'))
+        n.update(content=request.data.get('content'), title=request.data.get('title'),
+                                admin_id=request.data.get('admin_id'), news_category_id=request.data.get('cate_id'))
+        # n.news_image.add(request.data.get('newsimage_id'))
+        # n.save()
 
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class NewsCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
@@ -229,16 +268,21 @@ class BookingViewSet(viewsets.ViewSet, generics.DestroyAPIView):
 class CommentTourViewSet(viewsets.ViewSet, generics.DestroyAPIView):
     queryset = CommentTour.objects.all()
 
+    @action(methods=['put'], url_path='patch-comment-tour', detail=False)
+    def patch_comment_tour(self, request):
+        CommentTour.objects.filter(id=request.data.get('id')).update(content=request.data.get('content'))
 
-    # @action(methods=['patch'], url_path='patch-comment-tour', detail=False)
-    # def patch_comment_tour(self, request):
-    #     CommentTour.objects.filter(request.data.get('id')).update(content=request.data.get('content'))
-    #
-    #     return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
 
 class CommentNewsViewSet(viewsets.ViewSet, generics.DestroyAPIView):
     queryset = CommentNews.objects.all()
+
+    @action(methods=['put'], url_path='patch-comment-news', detail=False)
+    def patch_comment_tour(self, request):
+        CommentNews.objects.filter(id=request.data.get('id')).update(content=request.data.get('content'))
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class CustomerViewSet(viewsets.ViewSet):
@@ -249,8 +293,13 @@ class CustomerViewSet(viewsets.ViewSet):
         c = Customer.objects.create(phone=request.data.get('phone'), address=request.data.get('address'), user_id=request.data.get('user_id'))
         return Response(status=status.HTTP_201_CREATED)
 
+    @action(methods=['put'], url_path='put-customer', detail=False)
+    def put_customer(self, request):
+        c = Customer.objects.filter(user_id=request.data.get('user_id')).update(phone=request.data.get('phone'), address=request.data.get('address'))
+        return Response(status=status.HTTP_200_OK)
 
-class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
+
+class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = TourImage.objects.all()
     serializer_class = serializers.TourImageSerializer
 

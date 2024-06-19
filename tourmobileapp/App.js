@@ -19,6 +19,8 @@ import { CartReducer, MyUserReducer, NewsReducer, TourReducer } from './configs/
 import CreateTour from './components/Tour/CreateTour';
 import CreateNews from './components/News/CreateNews';
 import ChangeNews from './components/News/ChangeNews';
+import ChangTour from './components/Tour/ChangeTour';
+import ChangUser from './components/User/ChangeUser';
 
 
 
@@ -31,6 +33,7 @@ const TourStack = () => {
       <Stack.Screen name="TourDetails" component={TourDetails} options={{title:"Chi tiết tour du lịch"}} />
       <Stack.Screen name="Booking" component={Booking} options={{title:"Đặt tour"}} />
       <Stack.Screen name="CreateTour" component={CreateTour} options={{title:"Tạo tour du lịch"}} />
+      <Stack.Screen name='ChangTour' component={ChangTour} options={{title:"Thay đổi tour"}} />
     </Stack.Navigator>
   )
 }
@@ -50,7 +53,16 @@ const UserStack = () => {
   return (
     <Stack.Navigator> 
         <Stack.Screen name="Login" component={Login} options={{title: "Đăng nhập"}} />
-        <Stack.Screen name="Register" component={Register} options={{title:"Đăng ký"}} /> 
+        <Stack.Screen name="Register" component={Register} options={{title:"Đăng ký"}} />
+    </Stack.Navigator>
+  )
+}
+
+const ProfileStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name='profile' component={Profile} options={{title:"Tài khoản"}} />
+      <Stack.Screen name='ChangUser' component={ChangUser} options={{title:"Sửa tài khoản"}} /> 
     </Stack.Navigator>
   )
 }
@@ -68,7 +80,7 @@ const MyTab = () => {
         <Tab.Screen name="LogIn" component={UserStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="account-plus" />, title:"Đăng nhập"}} />
       </>:<>
       <Tab.Screen name="Cart" component={Cart} options={{tabBarIcon: () => <Icon size={30} color='blue' source="cart" />, title:"Giỏ hàng"}} />
-      <Tab.Screen name="Profile" component={Profile} options={{tabBarIcon: () => <Icon size={30} color='blue' source="account-tie" />, title:"Hồ sơ"}} />
+      <Tab.Screen name="Profile" component={ProfileStack} options={{tabBarIcon: () => <Icon size={30} color='blue' source="account-tie" />, title:"Hồ sơ"}} />
       </>}
     </Tab.Navigator>
   )

@@ -23,6 +23,7 @@ const NewsDetails = ({ navigation, route }) => {
     const [like, setLike] = React.useState(false)
     const nav = useNavigation()
     const newsDispatch = useContext(NewsDispatchContext)
+    const [change, setChange] = React.useState("")
 
     const loadNews = async () => {
         try {
@@ -91,6 +92,20 @@ const NewsDetails = ({ navigation, route }) => {
             } catch (ex) {
                 console.error(ex)
             }
+        }
+    }
+
+    const patchComment = async (id) => {
+        try {
+            let res = await APIs.put(endpoints['patchCommentNews'], {
+                'content': change,
+                'id':id
+            })
+            setPage(1)
+            setChange("")
+        } catch (ex) {
+            console.error(ex)
+        } finally {
         }
     }
 
@@ -189,9 +204,10 @@ const NewsDetails = ({ navigation, route }) => {
                         </View>
                         {user !== null && c.user.id===user.id?<>
                         <View>
-                            <TouchableOpacity  style={Style.margin}><Text style={[Style.button, {padding:10}]}>Chỉnh sửa</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => patchComment(c.id)}  style={Style.margin}><Text style={[Style.button, {padding:10}]}>Chỉnh sửa</Text></TouchableOpacity>
                             <TouchableOpacity onPress={() => confirmDeleteComment(c.id)} style={Style.margin}><Text style={[Style.button, {padding:10}]}>Xóa</Text></TouchableOpacity>
                         </View>
+                        <TextInput value={change} onChangeText={t => setChange(t)} placeholder='Nội dung bình luận sửa' style={Style.comment} />
                         </>:<></>}
                     </View>)}               
                 </>}

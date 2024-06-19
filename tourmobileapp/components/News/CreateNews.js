@@ -60,16 +60,16 @@ const CreateNews = () => {
     const Create = async () => {
         if(news.title===''){
             setErr(true)
-            setContentErr("")
+            setContentErr("Bạn chưa nhập tiêu đề!")
         } else if(news.content===''){
             setErr(true)
-            setContentErr("")
+            setContentErr("Bạn chưa nhập nội dung!")
         } else if (nameImage===""){
             setErr(true)
-            setContentErr("")
+            setContentErr("Bạn chưa nhập tên hình ảnh!")
         } else if(cateId===null){
             setErr(true)
-            setContentErr("")
+            setContentErr("Bạn chưa chọn loại tin tức!")
         } else {
             setErr(false)
             setLoading(true)
@@ -100,7 +100,7 @@ const CreateNews = () => {
                     'newsimage_id':res.data.id
                 })
                 console.info(res.data)
-                if(res.status===201){
+                if(res1.status===201){
                     newsDispatch({
                         'type': "add"
                     })

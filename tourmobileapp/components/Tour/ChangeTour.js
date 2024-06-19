@@ -9,16 +9,17 @@ import { TourDispatchContext } from "../../configs/Contexts"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
 
-const CreateTour = () => {
-    const [name, setName] = React.useState("")
-    const [description, setDescription] = React.useState("")
-    const [startDate, setStartDate] = React.useState("")
-    const [endDate, setEndDate] = React.useState("")
-    const [priceAdult, setPriceAdult] = React.useState(0)
-    const [priceChildren, setPriceChildren] = React.useState(0)
-    const [quantity, setQuantity] = React.useState(0)
+const ChangTour = ({route}) => {
+    const tours = route.params?.tour
+    const [name, setName] = React.useState(tours.name)
+    const [description, setDescription] = React.useState(tours.description)
+    const [startDate, setStartDate] = React.useState(moment(tours.start_date).format('DD/MM/YYYY'))
+    const [endDate, setEndDate] = React.useState(moment(tours.end_date).format('DD/MM/YYYY'))
+    const [priceAdult, setPriceAdult] = React.useState(tours.price_adult.toString())
+    const [priceChildren, setPriceChildren] = React.useState(tours.price_children.toString())
+    const [quantity, setQuantity] = React.useState(tours.quantity_ticket.toString())
     const [categories, setCategories] = React.useState([])
-    const [cateId, setCateId] = React.useState("")
+    const [cateId, setCateId] = React.useState(tours.tour_category_id)
     const [desName, setDesName] = React.useState("")
     const [desLocation, setDesLocation] = React.useState("")
     const [nameImage, setNameImage] = React.useState('')
@@ -33,6 +34,7 @@ const CreateTour = () => {
         try {
             let res = await APIs.get(endpoints["cateTours"]);
             setCategories(res.data);
+            console.info(tours)
         } catch (ex) {
             console.error(ex);
         }
@@ -60,7 +62,7 @@ const CreateTour = () => {
         })
     }
 
-    const Create = async () => {
+    const Change = async () => {
         if(name==="" || description==="" || quantity <= 0 ||priceAdult <= 0 || priceChildren <= 0 || desName==="" || desLocation==="" || cateId===""){
             setErr(true)
             setContentErr("Sai thông tin. Vui lòng nhập lại")
@@ -69,26 +71,27 @@ const CreateTour = () => {
             setContentErr("Ngày tháng không hợp lệ. Vui lòng kiểm tra lại")
         } else {
             setLoading(true)
-            let uriArray = tour.image.uri.split(".");
-            let fileExtension = uriArray[uriArray.length - 1];
-            let fileTypeExtended = `${tour.image.type}/${fileExtension}`;
+            console.info("hell")
+            // let uriArray = tour.image.uri.split(".");
+            // let fileExtension = uriArray[uriArray.length - 1];
+            // let fileTypeExtended = `${tour.image.type}/${fileExtension}`;
             try {
-                form = new FormData()
-                form.append('image', {
-                    uri:tour.image.uri,
-                    name:tour.image.fileName,
-                    type:fileTypeExtended
-                })
-                form.append('name', nameImage)
-                console.info(form)
-                let res = await APIs.post(endpoints['addTourImage'], form, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                })
-                console.info(res.data)
+                // form = new FormData()
+                // form.append('image', {
+                //     uri:tour.image.uri,
+                //     name:tour.image.fileName,
+                //     type:fileTypeExtended
+                // })
+                // form.append('name', nameImage)
+                // console.info(form)
+                // let res = await APIs.post(endpoints['addTourImage'], form, {
+                //     headers: {
+                //         'Content-Type': 'multipart/form-data'
+                //     }
+                // })
+                // console.info(res.data)
 
-                let res1 = await APIs.post(endpoints['addTour'], {
+                let res1 = await APIs.put(endpoints['changTour'], {
                     'name':name,
                     'description':description,
                     'start_date':startDate,
@@ -99,11 +102,12 @@ const CreateTour = () => {
                     'cate_id':cateId,
                     'desName':desName,
                     'desLocation':desLocation,
-                    'image_id':res.data.id
+                    'id':tours.id
+                    // 'image_id':res.data.id
                 })
-                    if(res1.status===201){
+                    if(res1.status===200){
                         tourDispatch({
-                            'type': "add"
+                            'type': "change"
                         })
                         nav.navigate('Tour')
                     }
@@ -112,22 +116,21 @@ const CreateTour = () => {
             } finally {
                 setLoading(false)
             }
-
         }
-        
+
     }
 
     return (
         <View style={Style.container}>
             <KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':"height"} >
             <ScrollView>     
-                <TextInput onChangeText={setName} placeholder="Nhập tên tour" style={[Style.margin, {width:350}]} mode="outlined" multiline={true} />
-                <TextInput onChangeText={setDescription} placeholder="Nhập thông tin tour" style={[Style.margin, {width:350}]} mode="outlined" multiline={true} />
-                <TextInput onChangeText={setStartDate} placeholder="Nhập ngày đi (dd/mm/yyyy)" style={[Style.margin, {width:350}]} mode="outlined" />
-                <TextInput onChangeText={setEndDate} placeholder="Nhập ngày kết thúc (dd/mm/yyyy)" style={[Style.margin, {width:350}]} mode="outlined" />
-                <TextInput onChangeText={setPriceAdult} placeholder="Nhập giá vé người lớn" style={[Style.margin, {width:350}]} mode="outlined" keyboardType="numeric" />
-                <TextInput onChangeText={setPriceChildren} placeholder="Nhập giá vé trẻ em (nếu có)" style={[Style.margin, {width:350}]} mode="outlined" keyboardType="numeric" />
-                <TextInput onChangeText={setQuantity} placeholder="Nhập số lượng vé" style={[Style.margin, {width:350}]} mode="outlined" keyboardType="numeric" />
+                <TextInput value={name} onChangeText={setName} placeholder="Nhập tên tour" style={[Style.margin, {width:350}]} mode="outlined" multiline={true} />
+                <TextInput value={description} onChangeText={setDescription} placeholder="Nhập thông tin tour" style={[Style.margin, {width:350}]} mode="outlined" multiline={true} />
+                <TextInput value={startDate} onChangeText={setStartDate} placeholder="Nhập ngày đi (dd/mm/yyyy)" style={[Style.margin, {width:350}]} mode="outlined" />
+                <TextInput value={endDate} onChangeText={setEndDate} placeholder="Nhập ngày kết thúc (dd/mm/yyyy)" style={[Style.margin, {width:350}]} mode="outlined" />
+                <TextInput value={priceAdult} onChangeText={setPriceAdult} placeholder="Nhập giá vé người lớn" style={[Style.margin, {width:350}]} mode="outlined" keyboardType="numeric" />
+                <TextInput value={priceChildren} onChangeText={setPriceChildren} placeholder="Nhập giá vé trẻ em (nếu có)" style={[Style.margin, {width:350}]} mode="outlined" keyboardType="numeric" />
+                <TextInput value={quantity} onChangeText={setQuantity} placeholder="Nhập số lượng vé" style={[Style.margin, {width:350}]} mode="outlined" keyboardType="numeric" />
                 <Text style={{marginTop:40}} >Chọn loại tour</Text>
                 <RadioButton.Group onValueChange={value => setCateId(value)} >
                     {categories.map(c => <RadioButton.Item key={c.id} status={cateId===c.id?"checked":"unchecked"} label={c.name} value={c.id} />)}
@@ -144,11 +147,11 @@ const CreateTour = () => {
                     <TextInput onChangeText={setNameImage} placeholder="Nhập tên hình ảnh" style={[Style.margin, {width:350}]} mode="outlined" />
                 </View>   
                 <HelperText style={[Style.margin, {color:"red"}]} type="error" visible={err}>{contentErr}</HelperText>
-                <Button loading={loading} mode="contained" onPress={Create} >Tạo</Button>
+                <Button loading={loading} mode="contained" onPress={Change} >Lưu</Button>
             </ScrollView>
             </KeyboardAvoidingView>    
         </View>
     )
 }
 
-export default CreateTour
+export default ChangTour; 
