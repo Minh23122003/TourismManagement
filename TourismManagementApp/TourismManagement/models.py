@@ -53,17 +53,16 @@ class TourCategory(BaseModel):
         return self.name
 
 
-class Destination(BaseModel):
-    name = models.CharField(max_length=200)
-    location = models.CharField(max_length=100)
+class Location(BaseModel):
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return f'{self.name} - {self.location}'
+        return self.name
 
 
-class TourImage(BaseModel):
-    name = models.CharField(max_length=100)
-    image = CloudinaryField(null=False)
+class Destination(BaseModel):
+    name = models.CharField(max_length=200)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -71,28 +70,49 @@ class TourImage(BaseModel):
 
 class Tour(BaseModel):
     name = models.CharField(max_length=150)
-    start_date = models.DateTimeField(null=False)
-    end_date = models.DateTimeField(null=False)
+    start_date = models.DateField(null=False)
+    end_date = models.DateField(null=False)
     description = RichTextField()
-    price_adult = models.IntegerField()
-    price_children = models.IntegerField()
     quantity_ticket = models.IntegerField()
     tour_category = models.ForeignKey(TourCategory, on_delete=models.CASCADE)
     destination = models.ManyToManyField(Destination)
-    tour_image = models.ManyToManyField(TourImage)
 
     def __str__(self):
         return self.name
 
 
-class Booking(BaseModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    tour = models.ForeignKey(Tour, on_delete=models.CASCADE)
-    quantity_ticket_adult = models.IntegerField()
-    quantity_ticket_children = models.IntegerField()
+class TourImage(BaseModel):
+    name = models.CharField(max_length=150)
+    image = CloudinaryField(null=False)
+    tour_id = models.ForeignKey(Tour, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.user_id} - {self.tour_id}'
+        return self.name
+
+
+class TypeOfTicket(BaseModel):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+class Price(BaseModel):
+    tour = models.ForeignKey(Tour, on_delete=models.CASCADE)
+    type = models.ForeignKey(TypeOfTicket, on_delete=models.CASCADE)
+    price = models.IntegerField()
+
+    # def __str__(self):
+    #     return self.id
+
+
+class Booking(BaseModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    price = models.ForeignKey(Price, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+
+    def __str__(self):
+        return f'{self.user_id} - {self.price_id}'
 
 
 class Bill(BaseModel):
@@ -128,23 +148,23 @@ class NewsCategory(BaseModel):
         return self.name
 
 
-class NewsImage(BaseModel):
-    name = models.CharField(max_length=100, null=False)
-    image = CloudinaryField(null=False)
-
-    def __str__(self):
-        return self.name
-
 
 class News(BaseModel):
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=150)
     content = RichTextField()
     news_category = models.ForeignKey(NewsCategory, on_delete=models.CASCADE)
-    news_image = models.ManyToManyField(NewsImage)
     admin = models.ForeignKey(Admin, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
+
+class NewsImage(BaseModel):
+    name = models.CharField(max_length=150, null=False)
+    image = CloudinaryField(null=False)
+    news_id = models.ForeignKey(News, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
 
 class Like(BaseModel):

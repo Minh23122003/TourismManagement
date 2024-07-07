@@ -20,7 +20,6 @@ from rest_framework_simplejwt.views import (
 TokenObtainPairView,
 TokenRefreshView
 )
-import debug_toolbar
 from django.conf import settings
 from django.urls import include, path
 from rest_framework import permissions
@@ -59,5 +58,4 @@ urlpatterns = [
             name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(),
             name='token_refresh'),
-    path('__debug__/', include(debug_toolbar.urls))
 ]

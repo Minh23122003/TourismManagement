@@ -35,9 +35,6 @@ pymysql.install_as_MySQLdb()
 # Application definition
 
 INSTALLED_APPS = [
-    'admin_tools_stats',  # this must be BEFORE 'admin_tools' and 'django.contrib.admin'
-    'django_nvd3',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,8 +47,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'oauth2_provider',
-
-    'debug_toolbar',
 ]
 
 REST_FRAMEWORK = {
@@ -73,7 +68,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware'
 ]
 
 ROOT_URLCONF = 'TourismManagementApp.urls'

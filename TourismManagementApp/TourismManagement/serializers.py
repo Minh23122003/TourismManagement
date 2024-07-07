@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from rest_framework.response import Response
+from django.db.models import Sum
 
 class ItemSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
@@ -25,7 +26,7 @@ class RatingSerializer(serializers.ModelSerializer):
 class TourSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tour
-        fields = ['id', 'name', 'start_date', 'end_date', 'description', 'price_adult', 'price_children', 'tour_category_id', 'quantity_ticket']
+        fields = ['id', 'name', 'start_date', 'end_date', 'description']
 
 
 class TourImageSerializer(ItemSerializer):
@@ -34,24 +35,21 @@ class TourImageSerializer(ItemSerializer):
         fields = ['id', 'name', 'image']
 
 class TourDetailsSerializer(TourSerializer):
-    tour_image = TourImageSerializer(many=True)
     destination = DestinationSerializer(many=True)
-
     remain_ticket = serializers.SerializerMethodField()
 
     def get_remain_ticket(self, tour):
-        book = Booking.objects.filter(tour_id=tour.id)
-        if book:
-            remain = tour.quantity_ticket
-            for b in book:
-                remain = remain - b.quantity_ticket_adult - b.quantity_ticket_children
-            return remain
-        return tour.quantity_ticket
+        price = Price.objects.filter(tour_id=tour.id)
+        book = Booking.objects.filter(price__in=price).aggregate(Sum('quantity'))
+        if book['quantity__sum']:
+            return int(tour.quantity_ticket) - int(book['quantity__sum'])
+        else:
+            return tour.quantity_ticket
 
 
     class Meta:
         model = TourSerializer.Meta.model
-        fields = TourSerializer.Meta.fields + ['tour_image'] + ['destination'] + ['remain_ticket']
+        fields = TourSerializer.Meta.fields + ['destination'] + ['remain_ticket']
 
 
 class TourRating(TourDetailsSerializer):

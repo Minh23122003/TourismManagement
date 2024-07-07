@@ -40,10 +40,10 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
                     queries = queries.filter(start_date__gt=datetime.datetime.strptime(start_date, '%d-%m-%Y')).order_by('-id')
             except:
                 queries = queries
-            destination = self.request.query_params.get('destination')
-            destination = Destination.objects.filter(location__icontains=destination)
-            if destination:
-                queries = queries.filter(destination__in=destination).distinct().order_by('-id')
+            # destination = self.request.query_params.get('destination')
+            # destination = Destination.objects.filter(location__icontains=destination)
+            # if destination:
+            #     queries = queries.filter(destination__in=destination).distinct().order_by('-id')
             cate_id = self.request.query_params.get('cate_id')
             if cate_id:
                 queries = queries.filter(tour_category_id=cate_id).order_by('-id')
@@ -71,10 +71,12 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
 
     @action(methods=['post'], url_path='post-rating', detail=True)
     def post_rating(self, request, pk):
-        rating, created = Rating.objects.update_or_create(tour=self.get_object(), user=request.user,
-                                                          create_defaults={'stars': request.data.get('stars')})
+        rating, created = Rating.objects.update_or_create(tour=self.get_object(), user=request.user)
 
         if not created:
+            rating.stars = request.data.get('stars')
+            rating.save()
+        else:
             rating.stars = request.data.get('stars')
             rating.save()
         return Response(serializers.RatingSerializer(rating).data)
