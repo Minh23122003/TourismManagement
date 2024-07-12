@@ -23,7 +23,6 @@ const Login = () => {
     const [loading, setLoading] = React.useState(false)
     const nav = useNavigation()
     const dispatch = useContext(MyDispatchContext)
-    const role = [{title: 'Khách hàng'}, {title: 'Nhân viên'}, {title: 'Quản lý'}]
     const [err, setErr] = React.useState(false)
 
     const change = (field, value) => {
@@ -37,8 +36,8 @@ const Login = () => {
         try {
             let res = await APIs.post(endpoints['login'], {
                 ...user,
-                "client_id": "aOXdqQDCChOv7uAYtLwdoaGWBqKoQx9MbtB6yffa",
-                "client_secret": "1rH0UWYz6j5SNjWul3U3hxyuSLle6NJJwhsKnzI2BBVmuVZXR9gtwkfMpoySyIhKyAcygua40Bx8aK94Hxe1yQuk5FJZdX9imRlD0Kd7hyMMBlDPWgVVkl84jSdSJrjk",
+                "client_id": "HqqfQ79msapPSD8i2WQMjHAi3KGxFbU1PDLapkav",
+                "client_secret": "cF5bGbEzAMwIHiESXn2lJMiGGVIRWHBVcCv6tk9NYoQSyAT7IOGIpMKfsceXkfkzyovYcZEOhYXmCSq1sN2vRQdMiopIE3Ds3AmKxDodkxGT2LW2jizJja5534yW4n8S",
                 "grant_type": "password"
             })
             console.info(res.data)
@@ -69,7 +68,6 @@ const Login = () => {
         <View style={[Style.container, Style.margin]}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
                 <Text style={Style.text}>Đăng nhập</Text>
-                <SelectDropdown data={['Khach', 'GGg', 'dsf']} />
                 {fields.map(f => <TextInput secureTextEntry={f.secureTextEntry} value={user[f.field]} onChangeText={t => change(f.field, t)} style={Style.margin} key={f.field} label={f.label} />)}
                 <HelperText style={[Style.margin, {color:"red"}]} visible={err} >Tên đăng nhập hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại</HelperText>
                 <Button style={Style.margin} icon="account" loading={loading} mode="contained" onPress={login}>ĐĂNG NHẬP</Button>

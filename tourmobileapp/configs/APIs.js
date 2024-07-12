@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const BASE_URL = 'https://minhdong.pythonanywhere.com/'
-// const BASE_URL = 'http://192.168.1.5:8000/'
+// const BASE_URL = 'https://minhdong.pythonanywhere.com/'
+const BASE_URL = 'http://192.168.1.5:8000/'
 // const BASE_URL = 'http://192.168.204.211:8000/'
 
 export const endpoints = {

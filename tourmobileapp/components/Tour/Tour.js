@@ -3,9 +3,9 @@ import { Image, ScrollView, Text, TouchableOpacity, View, RefreshControl, Activi
 import APIs, { endpoints } from "../../configs/APIs";
 import { List, Chip, Searchbar } from "react-native-paper";
 import Style from "./Style";
-import TourDetails from "./TourDetails";
 import { isCloseToBottom } from "../Utils/Utils";
-import { MyUserContext, TourContext, TourDispatchContext } from "../../configs/Contexts";
+import { MyUserContext} from "../../configs/Contexts";
+import { useNavigation } from "@react-navigation/native";
 
 
 const Tour = ({route, navigation}) => {
@@ -19,12 +19,11 @@ const Tour = ({route, navigation}) => {
     const [date, setDate] = React.useState("");
     const [destination, setDestination] = React.useState("");
     const user = useContext(MyUserContext)
-    const tourDispatch = useContext(TourDispatchContext)
-    const tour = useContext(TourContext)
+    const nav = useNavigation()
     
     const loadTours = async () => {
         if (page > 0){
-            let url = `${endpoints["tours"]}?price_min=${priceMin}&&price_max=${priceMax}&&start_date=${date}&&cate_id=${cateId}&&destination=${destination}&&page=${page}`
+            let url = `${endpoints["tours"]}?price_min=${priceMin}&&price_max=${priceMax}&&start_date=${date}&&cate_id=${cateId}&&location=${destination}&&page=${page}`
             try {
                 setLoading(true)
                 let res = await APIs.get(url);
@@ -34,11 +33,6 @@ const Tour = ({route, navigation}) => {
                     setTours(current => {return [...current, ...res.data.results]})
                 if (res.data.next===null)
                     setPage(-99);
-                tourDispatch({
-                    'type': "tour",
-                    'payload': parseInt(res.data.count)
-                })
-                console.info(tour)
             } catch (ex) {
                 console.error(ex);
             } finally {
@@ -58,7 +52,7 @@ const Tour = ({route, navigation}) => {
 
     React.useEffect(() => {
         loadTours();
-    }, [page, priceMin, priceMax, date, cateId, destination, tour])
+    }, [page, priceMin, priceMax, date, cateId, destination])
 
     React.useEffect(() => {
         loadCategories();
@@ -100,16 +94,11 @@ const Tour = ({route, navigation}) => {
                 <Searchbar style={Style.margin} placeholder="Nhập ngày đi: dd-mm-yyyy" value={date} onChangeText={t => search(t, setDate)} />
                 <Searchbar style={Style.margin} placeholder="Nhập điểm đến" value={destination} onChangeText={t => search(t, setDestination)} />
             </View>
-            {user!==null && user.is_superuser===true?<>
-            <TouchableOpacity style={Style.margin} onPress={() => navigation.navigate('CreateTour')} >
-                <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Tạo tour du lịch</Text>
-            </TouchableOpacity>
-            </>:<></>}
             <Text style={{fontSize:30, fontWeight:"bold"}}>Danh sách tour du lịch</Text>
             <ScrollView onScroll={loadMore} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} >
                 {loading && <ActivityIndicator />}
-                {tours.map(t => <TouchableOpacity key={t.id} onPress={() => navigation.navigate('TourDetails', {tourId : t.id})}>
-                    <List.Item style={Style.margin} title={t.name} left={() => <Image style={Style.img} source={{uri : t.tour_image[0].image}} />} />
+                {tours.map(t => <TouchableOpacity key={t.id} onPress={() => nav.navigate('TourDetails', {tourId : t.id})}>
+                    <List.Item style={Style.margin} title={t.name} left={() => <Image style={Style.img} source={{uri : t.images[0].image}} />} />
                 </TouchableOpacity>)}
                 {loading && page > 1 && <ActivityIndicator/>}
             </ScrollView>

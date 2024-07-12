@@ -32,7 +32,7 @@ const Profile = () => {
                 <Text style={Style.text} >Địa chỉ: {user.info.address}</Text>
                 <Text style={Style.text} >Số điện thoại: {user.info.phone}</Text>
                 <Image source={{uri:user.avatar}} style={Style.avatar} />
-                <Button onPress={()=> nav.navigate('ChangUser') } >Sửa thông tin tài khoản</Button>
+                <Button onPress={()=> nav.navigate('ChangeUser') } >Sửa thông tin tài khoản</Button>
                 <Button icon="logout" onPress={() => confirmLogout()}>ĐĂNG XUẤT</Button>
             </ScrollView>
         </View>

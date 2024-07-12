@@ -1,30 +1,29 @@
 import React, { useContext } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, ScrollView } from 'react-native';
 import APIs, { authApi, endpoints } from '../../configs/APIs';
 import Style from './Style';
 import moment from 'moment';
-import { Button, HelperText, TextInput } from 'react-native-paper';
+import { Button, HelperText, RadioButton, TextInput } from 'react-native-paper';
 import { CartDispatchContext, MyUserContext } from '../../configs/Contexts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Booking = ({ route, navigation }) => {
-    // const tourId = route.params?.tour;
     const [tour, setTour] = React.useState(route.params?.tour);
     const [loading, setLoading] = React.useState(false)
     const user = useContext(MyUserContext)
-    const [ticketAdult, setTicketAdult] = React.useState(0)
-    const [ticketChildren, setTicketChildren] = React.useState(0)
+    const [quantity, setQuantity] = React.useState(0)
     const cartDispatch = useContext(CartDispatchContext)
+    const [type, setType] = React.useState("")
 
     const addBooking = async () => {
-        if ((parseInt(ticketAdult) + parseInt(ticketChildren)) > tour.remain_ticket)
+        if (parseInt(quantity) > tour.remain_ticket)
             Alert.alert('Lỗi', "Số lượng vé đặt vượt quá số lượng vé còn lại", [{text:'Ok', onPress: () => navigation.navigate('Booking'), style:"default"}])
         else {
             try {
                 let token = await AsyncStorage.getItem('access-token')
                 let res = await authApi(token).post(endpoints['addBooking'](tour.id), {
-                    'quantity_ticket_adult': ticketAdult,
-                    'quantity_ticket_children': ticketChildren
+                    'quantity': quantity,
+                    'price_id': type 
                 })
                 if (res.data.status===406)
                     Alert.alert('Lỗi', res.data.content, [{text:'Ok', onPress: () => navigation.navigate('Booking'), style:"default"}])
@@ -42,17 +41,20 @@ const Booking = ({ route, navigation }) => {
 
 
     return (
-        <View style={{marginStart:20}}>
+        <ScrollView style={{marginStart:20}}>
             <Text style={[Style.nameTour, Style.margin]}>{tour.name}</Text>
             <Text style={Style.margin}>Ngày bắt đầu: {moment(tour.start_date).format('DD-MM-YYYY')}</Text>
             <Text style={Style.margin}>Ngày kết thúc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
-            <Text style={Style.margin}>Giá người lớn: {tour.price_adult} VND</Text>
-            <Text style={Style.margin}>Giá trẻ em: {tour.price_children} VND</Text>
+            <Text style={Style.margin}>Giá vé: </Text>
+            {tour.prices.map(p => <Text style={Style.margin}>{p.type}: {p.price} đồng</Text>)}
             <Text style={Style.margin}>Số vé còn lại: {tour.remain_ticket}</Text>
-            <TextInput onChangeText={setTicketAdult} placeholder='Nhập số vé người lớn' style={[Style.margin, {width:400}]} mode='outlined' keyboardType='numeric' />
-            <TextInput onChangeText={setTicketChildren} placeholder='Nhập số vé trẻ em' style={[Style.margin, {width:400}]} mode='outlined' keyboardType='numeric' />
+            <Text style={Style.margin}>Chon loai ve</Text>
+            <RadioButton.Group onValueChange={value => setType(value)} value={type}>
+                {tour.prices.map(p => <RadioButton.Item value={p.id} label={p.type} />)}
+            </RadioButton.Group>
+            <TextInput onChangeText={setQuantity} placeholder='Nhập số vé' style={[Style.margin, {width:400}]} mode='outlined' keyboardType='numeric' />
             <Button mode='contained' style={Style.margin} onPress={addBooking} >Đặt vé</Button>
-        </View>
+        </ScrollView>
     )
 }
 

@@ -14,8 +14,6 @@ const News = ({route, navigation}) => {
     const [cateId, setCateId] = React.useState("")
     const [page, setPage] = React.useState(1)
     const user = useContext(MyUserContext)
-    const newss = useContext(NewsContext)
-    const newsDispatch = useContext(NewsDispatchContext)
     const nav = useNavigation()
 
     const loadNews = async () => {
@@ -30,11 +28,6 @@ const News = ({route, navigation}) => {
                     setNews(current => {return [...current, ...res.data.results]})
                 if (res.data.next === null)
                     setPage(-99)
-                newsDispatch({
-                    'type': "news",
-                    'payload': parseInt(res.data.count)
-                })
-                console.info(newss)
             } catch (ex) {
                 console.error(ex)
             } finally {
@@ -54,7 +47,7 @@ const News = ({route, navigation}) => {
 
     React.useEffect(() => {
         loadNews();
-    }, [cateId, page, newss])
+    }, [cateId, page])
 
     React.useEffect(() => {
         loadCategories()
@@ -90,16 +83,11 @@ const News = ({route, navigation}) => {
                     {categories.map(c => <Chip onPress={() => search(c.id, setCateId)} mode={cateId===c.id?"outlined":"flat"} key={c.id} style={Style.margin} icon="shape-outline">{c.name}</Chip>)}
                 </>}
             </View>
-            {user!==null && user.is_superuser===true?<>
-            <TouchableOpacity style={Style.margin} onPress={() => nav.navigate("CreateNews")} >
-                <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Tạo tin tức mới</Text>
-            </TouchableOpacity>
-            </>:<></>}
             <Text style={{fontSize:30, fontWeight:"bold"}}>Các tin tức mới</Text>
             <ScrollView onScroll={loadMore} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                 {loading && <ActivityIndicator />}
                 {news.map(n => <TouchableOpacity key={n.id} onPress={() => navigation.navigate('NewsDetails', {newsId : n.id})}>
-                    <List.Item style={Style.margin} title={n.title} left={() => <Image style={Style.img} source={{uri : n.news_image[0].image}} />} />
+                    <List.Item style={Style.margin} title={n.title} left={() => <Image style={Style.img} source={{uri : n.images[0].image}} />} />
                 </TouchableOpacity>)}
                 {loading && page > 1 && <ActivityIndicator/>}
             </ScrollView>

@@ -8,7 +8,7 @@ import { HelperText, TouchableRipple, Button, TextInput } from "react-native-pap
 import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ChangUser = () => {
+const ChangeUser = () => {
     const [user, setUser] = React.useState({})
     const [err, setErr] = React.useState(false)
     const [contentErr, setContentErr] = React.useState("")
@@ -138,4 +138,4 @@ const ChangUser = () => {
     )
 }
 
-export default ChangUser
+export default ChangeUser

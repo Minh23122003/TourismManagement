@@ -14,14 +14,9 @@ import Register from "./components/User/Register"
 import Profile from "./components/User/Profile"
 import Cart from "./components/User/Cart"
 import { Icon } from 'react-native-paper';
-import { CartContext, CartDispatchContext, MyDispatchContext, MyUserContext, NewsContext, NewsDispatchContext, TourContext, TourDispatchContext } from './configs/Contexts';
-import { CartReducer, MyUserReducer, NewsReducer, TourReducer } from './configs/Reducer';
-import CreateTour from './components/Tour/CreateTour';
-import CreateNews from './components/News/CreateNews';
-import ChangeNews from './components/News/ChangeNews';
-import ChangTour from './components/Tour/ChangeTour';
+import { CartContext, CartDispatchContext, MyDispatchContext, MyUserContext } from './configs/Contexts';
+import { CartReducer, MyUserReducer } from './configs/Reducer';
 import ChangUser from './components/User/ChangeUser';
-
 
 
 const Stack = createNativeStackNavigator();
@@ -32,8 +27,6 @@ const TourStack = () => {
       <Stack.Screen name="Tour" component={Tour} options={{title:"Tour du lịch"}} />
       <Stack.Screen name="TourDetails" component={TourDetails} options={{title:"Chi tiết tour du lịch"}} />
       <Stack.Screen name="Booking" component={Booking} options={{title:"Đặt tour"}} />
-      <Stack.Screen name="CreateTour" component={CreateTour} options={{title:"Tạo tour du lịch"}} />
-      <Stack.Screen name='ChangTour' component={ChangTour} options={{title:"Thay đổi tour"}} />
     </Stack.Navigator>
   )
 }
@@ -43,8 +36,6 @@ const NewsStack = () => {
     <Stack.Navigator>
       <Stack.Screen name="News" component={News} options={{title: "Tin tức du lịch"}} />
       <Stack.Screen name="NewsDetails" component={NewsDetails} options={{title: "Chi tiết tin tức"}} />
-      <Stack.Screen name='CreateNews' component={CreateNews} options={{title: "Tạo tin tức mới"}} />
-      <Stack.Screen name='ChangeNews' component={ChangeNews} options={{title:"Sửa tin tức"}} />
     </Stack.Navigator>
   )
 }
@@ -62,7 +53,7 @@ const ProfileStack = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen name='profile' component={Profile} options={{title:"Tài khoản"}} />
-      <Stack.Screen name='ChangUser' component={ChangUser} options={{title:"Sửa tài khoản"}} /> 
+      {/* <Stack.Screen name='ChangUser' component={ChangUser} options={{title:"Sửa tài khoản"}} />  */}
     </Stack.Navigator>
   )
 }
@@ -89,25 +80,14 @@ const MyTab = () => {
 const App = () => {
   const [user, dispatch] = useReducer(MyUserReducer, null)
   const [cart, cartDispatch] = useReducer(CartReducer, 0)
-  const [tour, tourDispatch] = useReducer(TourReducer, 0)
-  const [news, newsDispatch] = useReducer(NewsReducer, 0)
-
 
   return (
     <NavigationContainer>
       <MyUserContext.Provider value={user}>
         <MyDispatchContext.Provider value={dispatch}>
           <CartContext.Provider value={cart}>
-            <CartDispatchContext.Provider value={cartDispatch}>
-              <TourContext.Provider value={tour}>
-                <TourDispatchContext.Provider value={tourDispatch}>
-                  <NewsContext.Provider value={news}>
-                    <NewsDispatchContext.Provider value={newsDispatch}>
-                      <MyTab />
-                    </NewsDispatchContext.Provider>
-                  </NewsContext.Provider>
-                </TourDispatchContext.Provider>
-              </TourContext.Provider>
+            <CartDispatchContext.Provider value={cartDispatch}>              
+              <MyTab />
             </CartDispatchContext.Provider>
           </CartContext.Provider>
         </MyDispatchContext.Provider>

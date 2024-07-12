@@ -5,7 +5,7 @@ import Style from './Style';
 import { Button, Card, List, TextInput } from 'react-native-paper';
 import RenderHTML from 'react-native-render-html';
 import moment from 'moment';
-import { MyUserContext, TourDispatchContext } from '../../configs/Contexts'
+import { MyUserContext } from '../../configs/Contexts'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'moment/locale/vi'
 import { isCloseToBottom } from '../Utils/Utils';
@@ -23,7 +23,6 @@ const TourDetails = ({ route, navigation }) => {
     const [loading, setLoading] = React.useState(false)
     const [stars, setStars] = React.useState(0)
     const nav = useNavigation()
-    const tourDispatch = useContext(TourDispatchContext)
     const [change, setChange] =React.useState("")
 
     const loadTour = async () => {
@@ -67,6 +66,7 @@ const TourDetails = ({ route, navigation }) => {
         }
         
     }
+
 
     React.useEffect(() => {
         loadTour();
@@ -139,22 +139,6 @@ const TourDetails = ({ route, navigation }) => {
         }
     }
 
-    const deleteTour = async () => {
-        try {
-            let res = await APIs.delete(endpoints['deleteTour'](tourId))
-            tourDispatch({
-                'type': "delete",
-            })
-            Alert.alert('Thành công', 'Xóa tour thành công', [{text:'Ok', onPress: () => nav.navigate('Tour'), style:"default"}])
-        } catch (ex){
-            console.error(ex)
-        }
-    }
-
-    const confirmDeleteTour = async () => {
-        await Alert.alert('Xác nhận', 'Bạn chắc chắn muốn xóa?', [{text:'Có', onPress: () => {deleteTour()}, style:"delete"}, {text:'Không'}])
-    } 
-
     const loadMore = ({nativeEvent}) => {
         if (loading===false && isCloseToBottom(nativeEvent)){
             setPage(page+1)
@@ -170,20 +154,20 @@ const TourDetails = ({ route, navigation }) => {
                         <Card.Content>
                             <RenderHTML contentWidth={width} source={{html: tour.description}} />
                         </Card.Content>
-                        <View style={Style.row}>
-                            <View>
-                                <Text style={Style.margin}>Ngày bắt đầu: {moment(tour.start_date).format('DD-MM-YYYY')}</Text>
-                                <Text style={Style.margin}>Ngày kết thúc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
-                                <Text style={Style.margin}>Giá người lớn: {tour.price_adult} VND</Text>
-                                <Text style={Style.margin}>Giá trẻ em: {tour.price_children} VND</Text>
-                                <Text style={Style.margin}>Số vé còn lại: {tour.remain_ticket}</Text>
-                            </View>
-                            <View style={{marginStart:40}}>
-                                <AirbnbRating count={5} reviews={['terrible', 'bad', 'ok', 'good', 'very good']} defaultRating={stars} size={20} onFinishRating={(number)=>{setStars(number); addRating(number)}}/>
-                            </View>
+                        <View>
+                            <Text style={Style.margin}>Ngày bắt đầu: {moment(tour.start_date).format('DD-MM-YYYY')}</Text>
+                            <Text style={Style.margin}>Ngày kết thúc: {moment(tour.end_date).format('DD-MM-YYYY')}</Text>
+                            <Text style={Style.margin}>Số vé còn lại: {tour.remain_ticket}</Text>
+                            <Text style={Style.margin}>Giá vé: </Text>
+                            {tour.prices.map(p => <Text style={Style.margin}>{p.type}: {p.price} đồng</Text>)}
+                            <Text style={Style.margin}>Điểm đến: </Text>
+                            {tour.destination.map(d => <Text style={Style.margin}>{d.name} ({d.location})</Text>)}
+                        </View>
+                        <View style={Style.margin}>
+                            <AirbnbRating count={5} reviews={['terrible', 'bad', 'ok', 'good', 'very good']} defaultRating={stars} size={20} onFinishRating={(number)=>{setStars(number); addRating(number)}}/>
                         </View>
                         <Button style={[{backgroundColor:"lightblue", width:100}]} onPress={() => navigation.navigate('Booking', {tour : tour})}>Đặt vé</Button>
-                        {tour.tour_image.map(t => <View key={t.id}>
+                        {tour.images.map(t => <View key={t.id}>
                             <Card.Cover style={Style.margin} source={{uri:t.image}} />
                             <View style={{alignItems:"center"}} >
                                 <Text style={{fontStyle:"italic"}}>{t.name}</Text>
@@ -191,16 +175,7 @@ const TourDetails = ({ route, navigation }) => {
                         </View> )}
                     </Card>
                 </>}
-                {user!==null && user.is_superuser===true?<>
-                <View style={[Style.container, Style.row, Style.margin]}>
-                <TouchableOpacity style={Style.margin} onPress={()=>navigation.navigate('ChangTour', {tour:tour})} >
-                    <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Sửa tour du lịch</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={Style.margin} onPress={() => confirmDeleteTour()} >
-                    <Text style={[Style.button, {width:150, backgroundColor:"blue"}]} >Xóa tour du lịch</Text>
-                </TouchableOpacity>
-                </View>
-                </>:<></>}
+                
                 <Text style={[Style.nameTour, Style.margin]}>Bình luận</Text>
                     <View style={[Style.row,{alignItems:"center", justifyContent:"center"}]}>
                             <TextInput value={content} onChangeText={t => setContent(t)} placeholder='Nội dung bình luận' style={Style.comment} />

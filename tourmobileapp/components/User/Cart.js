@@ -17,15 +17,16 @@ const Cart = ({navigation}) => {
     const loadBooking = async () => {
         try {
             let token = await AsyncStorage.getItem('access-token')
-            let res = await authApi(token).get(endpoints['booking'])
-            console.info(res.data)    
+            let res = await authApi(token).get(endpoints['booking'])   
             setBooking(res.data.results)
-            setTotal(res.data.total)
+            var s = 0
+            for (var i = 0; i < res.data.results.length; i++)
+                s = parseInt(s) + parseInt(res.data.results[i].total)
+            setTotal(s)
             cartDispatch({
                 'type': "cart",
                 'payload': res.data.results.length
             })
-            console.info(cart)
         } catch (ex) {
             console.error(ex)
         }
@@ -85,12 +86,12 @@ const Cart = ({navigation}) => {
         <ScrollView style={[Style.container, {}]} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} >
             {booking===null||booking.length===0?<Text style={Style.margin} >Bạn chưa đặt tour nào</Text>:<>
                 {booking.map(b => <View key={b.id} style={[Style.container, Style.margin, Style.booking, Style.row, {width:400}]}>
-                    <View style={[Style.margin, {flex:1}]}>
+                    <View style={[Style.margin, {flex:3}]}>
                         <Text>{b.tour_name}</Text>
-                        <Text>Số lượng vé người lớn: {b.quantity_ticket_adult}</Text>
-                        <Text>Số lượng vé trẻ em: {b.quantity_ticket_children}</Text>
+                        <Text>Số lượng: {b.quantity}</Text>
+                        <Text>Loại vé: {b.type}</Text>
                     </View>
-                    <View style={[Style.margin, {flex:1}]}>
+                    <View style={[Style.margin, {flex:2}]}>
                         <Text>Tổng tiền: {b.total}</Text>
                         <TouchableOpacity style={[Style.button, {width:70, marginTop:10, padding:5}]} key={b.id} onPress={() => confirmDelete(b.id)} ><Text>Hủy vé</Text></TouchableOpacity>
                     </View>

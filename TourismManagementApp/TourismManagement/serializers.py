@@ -12,9 +12,27 @@ class ItemSerializer(serializers.ModelSerializer):
 
 
 class DestinationSerializer(serializers.ModelSerializer):
+    location = serializers.SerializerMethodField()
+
+    def get_location(self, destination):
+        l = Location.objects.get(id=destination.location_id)
+
+        return l.name
     class Meta:
         model = Destination
-        fields = ['id', 'name', 'location']
+        fields = ['id', 'name'] + ['location']
+
+
+class PriceSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+
+    def get_type(self, price):
+        type = TypeOfTicket.objects.get(id=price.type_id)
+
+        return type.name
+    class Meta:
+        model = Price
+        fields = ['id'] + ['type'] + ['price']
 
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -37,6 +55,8 @@ class TourImageSerializer(ItemSerializer):
 class TourDetailsSerializer(TourSerializer):
     destination = DestinationSerializer(many=True)
     remain_ticket = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
+    prices = serializers.SerializerMethodField()
 
     def get_remain_ticket(self, tour):
         price = Price.objects.filter(tour_id=tour.id)
@@ -46,10 +66,20 @@ class TourDetailsSerializer(TourSerializer):
         else:
             return tour.quantity_ticket
 
+    def get_images(self, tour):
+        tour_image = TourImage.objects.filter(tour_id=tour.id)
+
+        return TourImageSerializer(tour_image, many=True).data
+
+    def get_prices(self, tour):
+        p = Price.objects.filter(tour_id=tour.id)
+
+        return PriceSerializer(p, many=True).data
+
 
     class Meta:
         model = TourSerializer.Meta.model
-        fields = TourSerializer.Meta.fields + ['destination'] + ['remain_ticket']
+        fields = TourSerializer.Meta.fields + ['destination'] + ['remain_ticket'] +['images'] + ['prices']
 
 
 class TourRating(TourDetailsSerializer):
@@ -77,15 +107,20 @@ class NewsImageSerializer(ItemSerializer):
 class NewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
-        fields = ['id', 'title', 'content', 'news_category_id']
+        fields = ['id', 'title', 'content']
 
 
 class NewsDetailsSerializer(NewsSerializer):
-    news_image = NewsImageSerializer(many=True)
+    images = serializers.SerializerMethodField()
+
+    def get_images(self, news):
+        news_image = NewsImage.objects.filter(news_id=news.id)
+
+        return NewsImageSerializer(news_image, many=True).data
 
     class Meta:
         model = NewsSerializer.Meta.model
-        fields = NewsSerializer.Meta.fields + ['news_image']
+        fields = NewsSerializer.Meta.fields + ['images']
 
 class NewsCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -161,17 +196,25 @@ class CommentNewsSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     total = serializers.SerializerMethodField()
     tour_name = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
 
     def get_tour_name(self, booking):
-        tour = Tour.objects.get(id=booking.tour_id)
+        price = Price.objects.get(id=booking.price_id)
+        tour = Tour.objects.get(id=price.tour_id)
         return tour.name
 
     def get_total(self, booking):
-        tour = Tour.objects.get(id=booking.tour_id)
-        return int(tour.price_adult) * int(booking.quantity_ticket_adult) + int(tour.price_children) * int(booking.quantity_ticket_children)
+        price = Price.objects.get(id=booking.price_id)
+        return int(price.price) * int(booking.quantity)
+
+    def get_type(self, booking):
+        price = Price.objects.get(id=booking.price_id)
+        type = TypeOfTicket.objects.get(id=price.type_id)
+
+        return type.name
     class Meta:
         model = Booking
-        fields = ['id', 'quantity_ticket_adult', 'quantity_ticket_children'] + ['total'] + ['tour_name']
+        fields = ['id', 'quantity'] + ['total'] + ['tour_name'] + ['type']
 
 
 

@@ -5,10 +5,10 @@ from rest_framework.response import Response
 from .models import *
 from datetime import datetime
 from django.http import JsonResponse
-import datetime
+from django.db.models import Sum
 
 
-class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView, generics.DestroyAPIView):
+class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
 
     queryset = Tour.objects.filter(active=True).order_by('-id')
     serializer_class = serializers.TourDetailsSerializer
@@ -30,20 +30,23 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
         if self.action.__eq__('list'):
             price_min = self.request.query_params.get('price_min')
             if price_min:
-                queries = queries.filter(price_adult__gte=int(price_min)).order_by('-id')
+                tour = Price.objects.values('tour_id').filter(price__gte=int(price_min)).distinct()
+                queries = queries.filter(id__in=tour).order_by('-id')
             price_max = self.request.query_params.get('price_max')
             if price_max:
-                queries = queries.filter(price_adult__lte=int(price_max)).order_by('-id')
+                tour = Price.objects.values('tour_id').filter(price__lte=int(price_max)).distinct()
+                queries = queries.filter(id__in=tour).order_by('-id')
             start_date = self.request.query_params.get('start_date')
             try:
                 if start_date:
-                    queries = queries.filter(start_date__gt=datetime.datetime.strptime(start_date, '%d-%m-%Y')).order_by('-id')
+                    queries = queries.filter(start_date=datetime.strptime(start_date, '%d-%m-%Y')).order_by('-id')
             except:
                 queries = queries
-            # destination = self.request.query_params.get('destination')
-            # destination = Destination.objects.filter(location__icontains=destination)
-            # if destination:
-            #     queries = queries.filter(destination__in=destination).distinct().order_by('-id')
+            location = self.request.query_params.get('location')
+            if location:
+                l = Location.objects.filter(name__icontains=location)
+                destination = Destination.objects.filter(location__in=l).distinct()
+                queries = queries.filter(destination__in=destination).distinct().order_by('-id')
             cate_id = self.request.query_params.get('cate_id')
             if cate_id:
                 queries = queries.filter(tour_category_id=cate_id).order_by('-id')
@@ -71,14 +74,10 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
 
     @action(methods=['post'], url_path='post-rating', detail=True)
     def post_rating(self, request, pk):
-        rating, created = Rating.objects.update_or_create(tour=self.get_object(), user=request.user)
+        rating, created = Rating.objects.update_or_create(tour=self.get_object(), user=request.user,
+                                                          defaults={'stars': request.data.get('stars')},
+                                                          create_defaults={'stars': request.data.get('stars')})
 
-        if not created:
-            rating.stars = request.data.get('stars')
-            rating.save()
-        else:
-            rating.stars = request.data.get('stars')
-            rating.save()
         return Response(serializers.RatingSerializer(rating).data)
 
 
@@ -95,40 +94,11 @@ class TourViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
     @action(methods=['post'], url_path='post-booking', detail=True)
     def post_booking(self, request, pk):
 
-        booking, created = Booking.objects.get_or_create(user=request.user, tour=self.get_object(), active=True, defaults={'quantity_ticket_adult':request.data.get('quantity_ticket_adult'), 'quantity_ticket_children':request.data.get('quantity_ticket_children')})
+        booking, created = Booking.objects.get_or_create(user=request.user, price_id=request.data.get('price_id'), active=True, defaults={'quantity': request.data.get('quantity')})
 
         if not created:
             return JsonResponse({'content': 'Ban da dat ve cho tour nay roi. Vui long huy ve de dat lai!', 'status': 406})
         return Response(serializers.BookingSerializer(booking).data, status=status.HTTP_200_OK)
-
-
-    @action(methods=['post'], url_path='post-tour', detail=False)
-    def post_tour(self, request):
-        t = Tour.objects.create(name=request.data.get('name'), description=request.data.get('description'),
-                        price_adult=request.data.get('adult'), price_children=request.data.get('children'),
-                        quantity_ticket=request.data.get('quantity'), tour_category_id=request.data.get('cate_id'),
-                                start_date=datetime.datetime.strptime(request.data.get('start_date'), '%d/%m/%Y'),
-                                end_date=datetime.datetime.strptime(request.data.get('end_date'), '%d/%m/%Y'))
-        t.tour_image.add(request.data.get('image_id'))
-        t.save()
-        d = Destination.objects.create(name=request.data.get('desName'), location=request.data.get('desLocation'))
-        t.destination.add(d)
-        t.save()
-
-        return Response(status=status.HTTP_201_CREATED)
-
-
-    @action(methods=['put'], url_path='put-tour', detail=False)
-    def put_tour(self, request):
-        t = Tour.objects.filter(id=request.data.get('id'))
-        t.update(name=request.data.get('name'), description=request.data.get('description'),
-                                price_adult=request.data.get('adult'), price_children=request.data.get('children'),
-                                quantity_ticket=request.data.get('quantity'),
-                                tour_category_id=request.data.get('cate_id'),
-                                start_date=datetime.datetime.strptime(request.data.get('start_date'), '%d/%m/%Y'),
-                                end_date=datetime.datetime.strptime(request.data.get('end_date'), '%d/%m/%Y'))
-
-        return Response(status=status.HTTP_200_OK)
 
 
 class TourCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
@@ -136,7 +106,7 @@ class TourCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retri
     serializer_class = serializers.TourCategorySerializer
 
 
-class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView, generics.DestroyAPIView):
+class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
 
     queryset = News.objects.filter(active=True).order_by('-id')
     serializer_class = serializers.NewsDetailsSerializer
@@ -197,26 +167,6 @@ class NewsViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIVi
 
         return Response(serializers.LikeSerializer(like).data)
 
-    @action(methods=['post'], url_path='post-news', detail=False)
-    def post_news(self, request):
-        n = News.objects.create(content=request.data.get('content'), title=request.data.get('title'), admin_id=request.data.get('admin_id'), news_category_id=request.data.get('cate_id'))
-        n.news_image.add(request.data.get('newsimage_id'))
-        n.save()
-
-        return Response(serializers.NewsSerializer(n).data, status=status.HTTP_201_CREATED)
-
-
-    @action(methods=['put'], url_path='put-news', detail=False)
-    def put_news(self, request):
-        n = News.objects.filter(id=request.data.get('id'))
-        n.update(content=request.data.get('content'), title=request.data.get('title'),
-                                admin_id=request.data.get('admin_id'), news_category_id=request.data.get('cate_id'))
-        # n.news_image.add(request.data.get('newsimage_id'))
-        # n.save()
-
-
-        return Response(status=status.HTTP_200_OK)
-
 
 class NewsCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
     queryset = NewsCategory.objects.filter(active=True)
@@ -246,11 +196,8 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView
     @action(methods=['get'], url_path='get-booking', detail=False)
     def get_booking(self, request):
         booking = Booking.objects.filter(user=request.user, active=True).all()
-        total = 0
-        for b in booking:
-            tour = Tour.objects.get(id=b.tour_id)
-            total = total + int(tour.price_adult) * int(b.quantity_ticket_adult) + int(tour.price_children) * int(b.quantity_ticket_children)
-        return JsonResponse({'results': serializers.BookingSerializer(booking, many=True).data, 'total': total})
+
+        return JsonResponse({'results': serializers.BookingSerializer(booking, many=True).data})
 
 
 class BookingViewSet(viewsets.ViewSet, generics.DestroyAPIView):
@@ -258,7 +205,7 @@ class BookingViewSet(viewsets.ViewSet, generics.DestroyAPIView):
 
     @action(methods=['post'], url_path='pay', detail=False)
     def pay(self, request):
-        booking = Booking.objects.filter(user_id=request.data.get('user_id'))
+        booking = Booking.objects.filter(user_id=request.data.get('user_id'), active=True)
         for b in booking:
             b.active = False
             b.save()
