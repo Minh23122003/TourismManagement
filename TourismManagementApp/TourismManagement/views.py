@@ -246,13 +246,3 @@ class CustomerViewSet(viewsets.ViewSet):
     def put_customer(self, request):
         c = Customer.objects.filter(user_id=request.data.get('user_id')).update(phone=request.data.get('phone'), address=request.data.get('address'))
         return Response(status=status.HTTP_200_OK)
-
-
-class TourImageViewSet(viewsets.ViewSet, generics.CreateAPIView):
-    queryset = TourImage.objects.all()
-    serializer_class = serializers.TourImageSerializer
-
-
-class NewsImageViewSet(viewsets.ViewSet, generics.CreateAPIView):
-    queryset = NewsImage.objects.all()
-    serializer_class = serializers.NewsImageSerializer

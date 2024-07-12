@@ -13,10 +13,10 @@ import Login from "./components/User/Login"
 import Register from "./components/User/Register"
 import Profile from "./components/User/Profile"
 import Cart from "./components/User/Cart"
+import ChangeUser from "./components/User/ChangeUser"
 import { Icon } from 'react-native-paper';
 import { CartContext, CartDispatchContext, MyDispatchContext, MyUserContext } from './configs/Contexts';
 import { CartReducer, MyUserReducer } from './configs/Reducer';
-import ChangUser from './components/User/ChangeUser';
 
 
 const Stack = createNativeStackNavigator();
@@ -53,7 +53,7 @@ const ProfileStack = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen name='profile' component={Profile} options={{title:"Tài khoản"}} />
-      {/* <Stack.Screen name='ChangUser' component={ChangUser} options={{title:"Sửa tài khoản"}} />  */}
+      <Stack.Screen name='ChangeUser' component={ChangeUser} options={{title:"Sửa tài khoản"}} /> 
     </Stack.Navigator>
   )
 }

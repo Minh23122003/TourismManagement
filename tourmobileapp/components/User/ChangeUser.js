@@ -138,4 +138,4 @@ const ChangeUser = () => {
     )
 }
 
-export default ChangeUser
+export default ChangeUser;
