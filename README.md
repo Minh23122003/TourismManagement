@@ -11,3 +11,9 @@ The steps run the project for Mobile App:
 1. Executing the command: npm install
 2. Executing the command: npm start
 3. Choosing the options to run
+
+
+Framework:
+1. Backend: Django
+2. Frontend: React Native
+3. Database: MySQL Server
